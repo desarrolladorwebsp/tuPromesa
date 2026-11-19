@@ -1,28 +1,28 @@
 "use client";
 
 import { motion } from "framer-motion";
-import VoteButton from "./VoteButton";
+import Image from "next/image";
 
 type FeaturedCaseProps = {
   inmobiliariaName: string;
-  inmobiliariaId: string;
   inmobiliariaLogo: string;
-  votes: number;
   userName: string;
   comment: string;
+  context: string;
   date: string;
-  highlight?: string;
+  dateTime: string;
+  sourceUrl: string;
 };
 
 export default function FeaturedCase({
   inmobiliariaName,
-  inmobiliariaId,
   inmobiliariaLogo,
   userName,
   comment,
+  context,
   date,
-  highlight,
-  votes,
+  dateTime,
+  sourceUrl,
 }: FeaturedCaseProps) {
   return (
     <motion.article
@@ -36,39 +36,49 @@ export default function FeaturedCase({
         {/* Top */}
         <div>
           {/* Nombre + fecha */}
-          <div className="flex flex-row items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div>
               <h3 className="text-sm  md:text-lg font-semibold text-red pb-0 mb-0">
                 {inmobiliariaName}
               </h3>
-              <span className="text-[11px]">{date}</span>
-              <p className="text-xs">
+              <time dateTime={dateTime} className="text-[11px] text-dark">
+                {date}
+              </time>
+              <p className="text-xs text-dark">
                 Reportado por{" "}
-                <span className="font-medium text-primary font-bold">
+                <span className="font-bold">
                   {userName}
                 </span>
               </p>
             </div>
 
-            <div>
-              <img
+            <div className="shrink-0">
+              <Image
                 src={inmobiliariaLogo}
-                alt={`Logo de ${inmobiliariaName}`}
-                className="w-[120px] rounded-lg"
+                alt=""
+                width={120}
+                height={60}
+                className="h-auto w-20 rounded-lg sm:w-[120px]"
               />
             </div>
           </div>
           {/* Comentario */}
-          <p className="mt-2 text-sm leading-[1.2] text-text-secondary line-clamp-3 sm:line-clamp-4">
+          <blockquote cite={sourceUrl} className="mt-2 text-sm leading-relaxed text-dark">
             “{comment}”
-          </p>
+          </blockquote>
+          <p className="mt-1 text-sm leading-relaxed text-dark">{context}</p>
         </div>
 
         {/* Bottom */}
-        <div className="flex items-center justify-between mt-2">
-          <span className="text-[11px] font-bold text-text-secondary text-green-700">
-            Caso verificado
-          </span>
+        <div className="mt-2">
+          <a
+            href={sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block rounded-sm py-1 text-xs font-bold text-[var(--color-primary-active)] underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            Ver reclamo original en Reclamos.cl
+          </a>
         </div>
       </div>
     </motion.article>

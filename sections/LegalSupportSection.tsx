@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import OpenCaseModalButton from "@/components/common/OpenCaseModalButton";
 
 const legalPoints = [
@@ -36,13 +37,12 @@ export default function LegalSupportSection() {
             </h2>
 
             <p className="mt-4 max-w-2xl text-base leading-relaxed text-[var(--color-text-secondary)] sm:text-lg">
-              Esta plataforma cuenta con el apoyo de{" "}
+              Tu caso puede ser revisado por{" "}
               <span className="font-semibold text-[var(--color-text-primary)]">
-                Estudio Jurídico Vidal y López
-              </span>
-              , un equipo que puede revisar antecedentes, orientar a los
-              afectados y apoyar la búsqueda de soluciones frente a
-              incumplimientos inmobiliarios.
+                estudios jurídicos
+              </span>{" "}
+              para evaluar los antecedentes y orientar a las personas afectadas
+              por incumplimientos inmobiliarios.
             </p>
           </div>
 
@@ -70,13 +70,6 @@ export default function LegalSupportSection() {
 
           <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
             <OpenCaseModalButton label="Solicitar evaluación de mi caso" />
-            <a
-              href="https://www.estudiolyv.cl/#Contacto"
-              target="_blank"
-              className="inline-flex items-center justify-center rounded-[var(--radius-md)] border border-gold px-6 py-3 text-sm font-bold text-[var(--color-text-primary)] transition hover:bg-white/5"
-            >
-              Conocer más del respaldo legal
-            </a>
           </div>
         </motion.div>
 
@@ -88,22 +81,21 @@ export default function LegalSupportSection() {
           className="relative"
         >
           <div className="overflow-hidden rounded-[var(--radius-xl)] border border-white/10 bg-[var(--color-bg-surface)] shadow-[var(--shadow-strong)]">
-            <div className="aspect-[4/5] w-full bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(0,0,0,0.18))]">
-              <img
-                src="/images/legal-team.jpg"
-                alt="Equipo legal de apoyo revisando antecedentes"
-                className="h-full w-full object-cover"
+            <div className="relative aspect-[4/5] w-full bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(0,0,0,0.18))]">
+              <Image
+                src="/images/reported-cases-secondary.jpg"
+                alt="Personas revisando documentos de una propiedad"
+                fill
+                sizes="(min-width: 1280px) 550px, (min-width: 1024px) 45vw, 100vw"
+                className="object-cover"
               />
             </div>
 
             <div className="border-t border-white/10 p-5 md:p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-primary)]">
-                    Equipo aliado
-                  </p>
-                  <h3 className="mt-2 text-2xl font-extrabold text-[var(--color-text-primary)]">
-                    Estudio Jurídico Vidal y López
+                  <h3 className="text-2xl font-extrabold text-[var(--color-text-primary)]">
+                    Estudios jurídicos
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-secondary)]">
                     Apoyo legal para la revisión de antecedentes, orientación y

@@ -14,58 +14,75 @@ interface Inmobiliaria {
 const cases = [
   {
     inmobiliariaName: "Inmobiliaria SSILVA",
-    votes: 10,
-    inmobiliariaId: "horizonte-001",
-    inmobiliariaLogo: "/inmobiliarias/inmobiliaria-ssilva.png", // Ajusta la ruta a tus assets
-    userName: "Carlos Morales",
-    comment:
-      "Llevamos más de 2 años esperando la entrega del departamento en el proyecto 'Altos del Parque'. Siempre inventan una excusa nueva con la recepción municipal de la municipalidad y ahora se niegan a devolver el dinero del pie argumentando multas en el contrato.",
-    date: "14 Mar 2024",
-    highlight: "2 años de atraso",
+    date: "25 Jun 2025",
+    dateTime: "2025-06-25",
+    userName: "P. I.",
+    comment: "se comprometieron a realizar la devolución del dinero a 30 días corridos, plazo el cual finalizó el día 25 de mayo.",
+    context: "La persona señala que firmó un acuerdo escrito para dejar sin efecto la promesa de compraventa del departamento en Mira al Mar.",
+    sourceUrl: "https://www.reclamos.cl/inmobiliaria-ssilva/reclamo/2025/jun/inmobiliaria-ssilva-devoluci-n-pie",
   },
   {
     inmobiliariaName: "Inmobiliaria SSILVA",
-    votes: 10,
-    inmobiliariaId: "vista-bella-002",
-    inmobiliariaLogo: "/inmobiliarias/inmobiliaria-ssilva.png",
-    userName: "Andrea Silva",
-    comment:
-      "Me entregaron la casa hace 6 meses y ya presenta filtraciones graves en el baño principal que están arruinando el piso flotante del pasillo. He llamado incontables veces a postventa, envían correos automáticos, pero ningún técnico ha venido a ver el problema.",
-    date: "28 Feb 2024",
-    highlight: "Postventa inactiva",
+    date: "06 May 2025",
+    dateTime: "2025-05-06",
+    userName: "P. P.",
+    comment: "por supuesto decidí que no dada la Mala experiencia y quedaron de devolverme mis cheques y reserva, hasta ahora han pasado dos meses",
+    context: "La compradora cuenta que desistió tras un atraso del proyecto y pidió recuperar los trescientos mil pesos de la reserva.",
+    sourceUrl: "https://www.reclamos.cl/inmobiliaria-ssilva/reclamo/2025/may/inmobiliaria-ssilva-no-existe-comunciaci-n-ni-devoluci-n-de-reserva",
   },
   {
     inmobiliariaName: "Inmobiliaria SSILVA",
-    votes: 5,
-    inmobiliariaId: "valle-central-003",
-    inmobiliariaLogo: "/inmobiliarias/inmobiliaria-ssilva.png",
-    userName: "Felipe Arancibia",
-    comment:
-      "El proyecto quedó paralizado sin previo aviso. Desistí de la compra exigiendo la cláusula de salida, y ahora retienen ilegalmente las 100 UF de la reserva. Ya nos organizamos con 15 vecinos más para presentar una demanda colectiva.",
-    date: "05 Abr 2024",
-    highlight: "Retención de reserva",
+    date: "09 Oct 2024",
+    dateTime: "2024-10-09",
+    userName: "C. I.",
+    comment: "ya que el mal servicio, parte desde que jamás te informan cómo va el proceso de la recepción fnal, ni de compraventa.",
+    context: "La persona señala que compró en 2022 y cuestiona cómo la inmobiliaria comunicó el avance de los trámites durante la compra.",
+    sourceUrl: "https://www.reclamos.cl/inmobiliaria-ssilva/reclamo/2024/oct/inmobiliaria-ssilva-pesimo-servicio",
   },
   {
-    inmobiliariaName: "Inmobiliaria Manquehue",
-    votes: 10,
-    inmobiliariaId: "valle-central-0030",
-    inmobiliariaLogo: "/inmobiliarias/inmobiliaria-manquehue.png",
-    userName: "Felipe Arancibia",
-    comment:
-      "El proyecto quedó paralizado sin previo aviso. Desistí de la compra exigiendo la cláusula de salida, y ahora retienen ilegalmente las 100 UF de la reserva. Ya nos organizamos con 15 vecinos más para presentar una demanda colectiva.",
-    date: "05 Abr 2024",
-    highlight: "Retención de reserva",
+    inmobiliariaName: "Inmobiliaria SSILVA",
+    date: "22 Ago 2024",
+    dateTime: "2024-08-22",
+    userName: "P. R.",
+    comment: "termina ofreciéndonos en el papel el departamento 1507, supuestamente de 1b1d, cuando en realidad se trataba de un departamento estudio",
+    context: "La persona relata que buscaba comprar dos departamentos y que descubrió la diferencia en la distribución de uno cuando se acercaba la entrega.",
+    sourceUrl: "https://www.reclamos.cl/inmobiliaria-ssilva/reclamo/2024/aug/inmobiliaria-ssilva-p-sima-gesti-n",
   },
   {
-    inmobiliariaName: "Inmobiliaria Manquehue",
-    votes: 5,
-    inmobiliariaId: "valle-central-00300",
-    inmobiliariaLogo: "/inmobiliarias/inmobiliaria-manquehue.png",
-    userName: "Felipe Arancibia",
-    comment:
-      "El proyecto quedó paralizado sin previo aviso. Desistí de la compra exigiendo la cláusula de salida, y ahora retienen ilegalmente las 100 UF de la reserva. Ya nos organizamos con 15 vecinos más para presentar una demanda colectiva.",
-    date: "05 Abr 2024",
-    highlight: "Retención de reserva",
+    inmobiliariaName: "Inmobiliaria SSILVA",
+    date: "22 Jul 2024",
+    dateTime: "2024-07-22",
+    userName: "J. O.",
+    comment: "Pague el $1.000.000, envié mis antecedentes en Marzo y nunca más me contactaron.",
+    context: "La persona señala que el pago correspondía a la reserva de un sitio en Panguipulli. La empresa también ofrecía evaluar sus antecedentes para un crédito hipotecario durante el proceso comercial.",
+    sourceUrl: "https://www.reclamos.cl/inmobiliaria-ssilva/reclamo/2024/jul/inmobiliaria-ssilva-sin-devolucion-de-reserva",
+  },
+  {
+    inmobiliariaName: "Inmobiliaria SSILVA e Inmobiliaria Los Sargazos",
+    date: "27 Nov 2023",
+    dateTime: "2023-11-27",
+    userName: "A. M.",
+    comment: "y han pasado dos años y aún no tenemos una fecha concreta de cuando se realizará la entrega.",
+    context: "La persona indica que la entrega del departamento ubicado en Reñaca estaba prevista para diciembre de 2021 y pide recuperar el pie y la reserva.",
+    sourceUrl: "https://www.reclamos.cl/reclamo/2023/nov/inmobiliaria-ssilva-inmobiliaria-los-sargazos-spa-sin-respuesta-sobre-fecha-entrega-departa",
+  },
+  {
+    inmobiliariaName: "Inmobiliaria SSILVA",
+    date: "23 Jul 2023",
+    dateTime: "2023-07-23",
+    userName: "A. B.",
+    comment: "Me entregaron un departamento de viña del mar canal beagle, donde pasando sólo dos semanas ya tiene imperfecciones, post venta no se hace cargo.",
+    context: "La publicación se refiere a un departamento en Canal Beagle. La persona menciona fallas en ascensores y agua caliente.",
+    sourceUrl: "https://www.reclamos.cl/inmobiliaria-ssilva/reclamo/2023/jul/inmobiliaria-ssilva-departamento-en-mal-estado-entregado-solo-hace-un-m",
+  },
+  {
+    inmobiliariaName: "Inmobiliaria SSILVA e Inmobiliaria Los Sargazos",
+    date: "03 Mar 2023",
+    dateTime: "2023-03-03",
+    userName: "T. F.",
+    comment: "NECESITO DEVOLUCION TOTAL DEL PIE MAS LA RESERVA Y TODO LO INVERTIDO EN EL PROYECTO ya que no aceptare otra fecha estimada de entrega",
+    context: "La persona relata que la entrega de su departamento en Reñaca se postergó varias veces desde la fecha prevista.",
+    sourceUrl: "https://www.reclamos.cl/reclamo/2023/mar/inmobiliaria-ssilva-inmobiliaria-los-sargazos-spa-sin-respuesta-la-solicitud",
   },
 ];
 
@@ -105,20 +122,14 @@ export default function ReportedCasesSection() {
           {/* Companies */}
           <div className="rounded-[var(--radius-lg)] border border-white/8 bg-[var(--color-bg-surface)] p-5 shadow-[var(--shadow-medium)] md:p-7">
             <h2 className="text-center text-lg font-extrabold text-red sm:text-xl md:text-2xl">
-              Inmobiliarias mencionadas por usuarios
+              Reclamos publicados por usuarios
             </h2>
             <div className="mt-2 grid grid-cols-1 gap-4">
               {cases.map((caseItem) => (
                 <FeaturedCase
-                  key={caseItem.inmobiliariaId}
-                  inmobiliariaName={caseItem.inmobiliariaName}
-                  votes={caseItem.votes}
-                  inmobiliariaId={caseItem.inmobiliariaId}
-                  inmobiliariaLogo={caseItem.inmobiliariaLogo}
-                  userName={caseItem.userName}
-                  comment={caseItem.comment}
-                  date={caseItem.date}
-                  highlight={caseItem.highlight}
+                  key={caseItem.sourceUrl}
+                  inmobiliariaLogo="/inmobiliarias/inmobiliaria-ssilva.png"
+                  {...caseItem}
                 />
               ))}
             </div>
@@ -182,20 +193,9 @@ export default function ReportedCasesSection() {
               Respaldo legal y acción colectiva
             </h3>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--color-text-secondary)]">
-              Este espacio recopila antecedentes que pueden ser evaluados para
-              acciones legales colectivas. Tu caso importa.
+              Este espacio recopila antecedentes que estudios jurídicos pueden
+              evaluar para posibles acciones legales colectivas.
             </p>
-
-            <span className="text-sm tracking-wide text-white/50">
-              Asociados con:{" "}
-              <a
-                href="https://www.estudiolyv.cl/"
-                target="_blank"
-                className="text-gold "
-              >
-                Estudio de Abogados Lopez y Vidal
-              </a>
-            </span>
           </div>
         </motion.aside>
       </div>
