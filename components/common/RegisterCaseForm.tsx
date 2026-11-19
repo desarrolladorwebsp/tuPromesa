@@ -6,9 +6,11 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import Link from "next/link";
+import { amountOptions, communicationOptions } from "@/constants/cases";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -19,6 +21,7 @@ type CaseFormData = {
   email: string;
   phone: string;
   inmobiliariaId: string;
+  suggestedCompany: string;
   incidentDate: string;
   claimedAmount: string;
   issueDescription: string;
@@ -26,22 +29,13 @@ type CaseFormData = {
   priorCommunication: string;
   claimObjective: string;
   acceptTerms: boolean;
+  allowPublication: boolean;
   declaracionVeracidad: boolean;
 };
 
 type Inmobiliaria = {
   _id: string;
   name: string;
-  rut?: string;
-  direccion?: string;
-  contacto?: string;
-};
-
-type NewInmobiliariaData = {
-  rut: string;
-  name: string;
-  direccion: string;
-  contacto: string;
 };
 
 type RegisterCaseFormProps = {
@@ -64,6 +58,7 @@ const initialForm: CaseFormData = {
   email: "",
   phone: "",
   inmobiliariaId: "",
+  suggestedCompany: "",
   incidentDate: "",
   claimedAmount: "",
   issueDescription: "",
@@ -71,27 +66,9 @@ const initialForm: CaseFormData = {
   priorCommunication: "",
   claimObjective: "",
   acceptTerms: false,
+  allowPublication: false,
   declaracionVeracidad: false,
 };
-
-const initialNewInmobiliaria: NewInmobiliariaData = {
-  rut: "",
-  name: "",
-  direccion: "",
-  contacto: "",
-};
-
-const amountOptions = [
-  "Menos de 100 UF",
-  "Más de 100 UF",
-  "Más de 500 UF",
-  "Más de 1.000 UF",
-];
-
-const communicationOptions = [
-  "Sí, me he comunicado con ellos",
-  "No me he comunicado aún",
-];
 
 // ─── Main Component ─────────────────────────────────────────────────────────
 
@@ -105,20 +82,14 @@ export default function RegisterCaseForm({
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [receipt, setReceipt] = useState("");
+  const submitting = useRef(false);
+  const submissionKey = useRef<string | null>(null);
 
   // Inmobiliarias state
   const [inmobiliarias, setInmobiliarias] = useState<Inmobiliaria[]>([]);
   const [loadingInmobiliarias, setLoadingInmobiliarias] = useState(false);
   const [showNewInmobiliaria, setShowNewInmobiliaria] = useState(false);
-  const [newInmobiliaria, setNewInmobiliaria] = useState<NewInmobiliariaData>(
-    initialNewInmobiliaria,
-  );
-  const [newInmobiliariaErrors, setNewInmobiliariaErrors] = useState<
-    Partial<Record<keyof NewInmobiliariaData, string>>
-  >({});
-  const [creatingInmobiliaria, setCreatingInmobiliaria] = useState(false);
-
   // ─── Fetch inmobiliarias ────────────────────────────────────────────
 
   const fetchInmobiliarias = useCallback(async () => {
@@ -156,12 +127,6 @@ export default function RegisterCaseForm({
     setErrors((prev) => ({ ...prev, [name]: "" }));
   }
 
-  function handleNewInmobiliariaChange(e: ChangeEvent<HTMLInputElement>) {
-    const { name, value } = e.target;
-    setNewInmobiliaria((prev) => ({ ...prev, [name]: value }));
-    setNewInmobiliariaErrors((prev) => ({ ...prev, [name]: "" }));
-  }
-
   // ─── Validation per step ────────────────────────────────────────────
 
   function validateStep(s: number): Partial<Record<string, string>> {
@@ -179,8 +144,11 @@ export default function RegisterCaseForm({
     }
 
     if (s === 1) {
-      if (!form.inmobiliariaId.trim())
-        nextErrors.inmobiliariaId = "Selecciona una inmobiliaria.";
+      if (showNewInmobiliaria ? !form.suggestedCompany.trim() : !form.inmobiliariaId) {
+        nextErrors.inmobiliariaId = showNewInmobiliaria
+          ? "Indica el nombre de la inmobiliaria."
+          : "Selecciona una inmobiliaria.";
+      }
       if (!form.declaracionVeracidad)
         nextErrors.declaracionVeracidad =
           "Debes declarar que la información es verídica.";
@@ -215,21 +183,6 @@ export default function RegisterCaseForm({
     return nextErrors;
   }
 
-  function validateNewInmobiliaria(): Partial<
-    Record<keyof NewInmobiliariaData, string>
-  > {
-    const errs: Partial<Record<keyof NewInmobiliariaData, string>> = {};
-    if (!newInmobiliaria.rut.trim())
-      errs.rut = "Ingresa el RUT de la inmobiliaria.";
-    if (!newInmobiliaria.name.trim())
-      errs.name = "Ingresa el nombre de la inmobiliaria.";
-    if (!newInmobiliaria.direccion.trim())
-      errs.direccion = "Ingresa la dirección de la inmobiliaria.";
-    if (!newInmobiliaria.contacto.trim())
-      errs.contacto = "Ingresa un medio de contacto.";
-    return errs;
-  }
-
   // ─── Navigation ─────────────────────────────────────────────────────
 
   function handleNext() {
@@ -250,85 +203,50 @@ export default function RegisterCaseForm({
     }
   }
 
-  // ─── Create Inmobiliaria ────────────────────────────────────────────
-
-  async function handleCreateInmobiliaria() {
-    const errs = validateNewInmobiliaria();
-    setNewInmobiliariaErrors(errs);
-    if (Object.keys(errs).length > 0) return;
-
-    setCreatingInmobiliaria(true);
-    try {
-      const res = await fetch("/api/inmobiliarias", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newInmobiliaria),
-      });
-      const data = await res.json();
-
-      if (data.ok && data.id) {
-        // Refresh list & select the new one
-        await fetchInmobiliarias();
-        setForm((prev) => ({ ...prev, inmobiliariaId: data.id }));
-        setNewInmobiliaria(initialNewInmobiliaria);
-        setShowNewInmobiliaria(false);
-        setErrors((prev) => ({ ...prev, inmobiliariaId: "" }));
-      }
-    } catch {
-      setNewInmobiliariaErrors({
-        name: "Error al crear la inmobiliaria. Inténtalo de nuevo.",
-      });
-    } finally {
-      setCreatingInmobiliaria(false);
-    }
-  }
-
   // ─── Submit ─────────────────────────────────────────────────────────
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (step !== 3 || submitting.current || receipt) return;
 
-    const validationErrors = validateStep(3);
-    setErrors(validationErrors);
-    if (Object.keys(validationErrors).length > 0) return;
+    for (let current = 0; current <= 3; current++) {
+      const validationErrors = validateStep(current);
+      if (Object.keys(validationErrors).length > 0) {
+        setErrors(validationErrors);
+        setStep(current);
+        return;
+      }
+    }
 
+    submitting.current = true;
     try {
       setIsSubmitting(true);
       setSubmitError("");
+      submissionKey.current ??= crypto.randomUUID();
 
       const res = await fetch("/api/case", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          firstName: form.firstName,
-          lastName: form.lastName,
-          rut: form.rut,
-          email: form.email,
-          phone: form.phone,
-          inmobiliariaId: form.inmobiliariaId,
-          incidentDate: form.incidentDate,
-          claimedAmount: form.claimedAmount,
-          issueDescription: form.issueDescription,
-          expectedSolution: form.expectedSolution,
-          priorCommunication: form.priorCommunication,
-          claimObjective: form.claimObjective,
-          acceptTerms: form.acceptTerms,
+          ...form,
+          inmobiliariaId: showNewInmobiliaria ? "" : form.inmobiliariaId,
+          suggestedCompany: showNewInmobiliaria ? form.suggestedCompany : "",
+          submissionKey: submissionKey.current,
         }),
       });
+      const data = await res.json().catch(() => null);
 
-      const data = await res.json();
-
-      if (!res.ok || !data.ok) {
-        setSubmitError(data.error || "Ocurrió un error al enviar el reclamo.");
+      if (!res.ok || !data?.ok || typeof data.id !== "string") {
+        setSubmitError(data?.error || "No se pudo guardar el reclamo. Inténtalo de nuevo.");
         return;
       }
 
-      setSubmitSuccess(true);
-      setStep(4); // <- Cambiamos al paso 4 (Vista de éxito)
-      // ELIMINADO: onSubmitSuccess?.(form); -> Esto cerraba el modal inmediatamente. Lo pasamos al botón de "Entendido" en el paso 4.
+      setReceipt(data.id);
+      setStep(4);
     } catch {
       setSubmitError("Error de conexión. Inténtalo de nuevo.");
     } finally {
+      submitting.current = false;
       setIsSubmitting(false);
     }
   }
@@ -378,6 +296,7 @@ export default function RegisterCaseForm({
             <Input
               id="firstName"
               name="firstName"
+              maxLength={100}
               value={form.firstName}
               onChange={handleChange}
               placeholder="Tu nombre"
@@ -390,6 +309,7 @@ export default function RegisterCaseForm({
             <Input
               id="lastName"
               name="lastName"
+              maxLength={100}
               value={form.lastName}
               onChange={handleChange}
               placeholder="Tu apellido"
@@ -402,6 +322,7 @@ export default function RegisterCaseForm({
             <Input
               id="rut"
               name="rut"
+              maxLength={20}
               value={form.rut}
               onChange={handleChange}
               placeholder="12.345.678-9"
@@ -414,6 +335,7 @@ export default function RegisterCaseForm({
             <Input
               id="email"
               name="email"
+              maxLength={254}
               type="email"
               value={form.email}
               onChange={handleChange}
@@ -427,6 +349,7 @@ export default function RegisterCaseForm({
             <Input
               id="phone"
               name="phone"
+              maxLength={25}
               value={form.phone}
               onChange={handleChange}
               placeholder="+56 9 1234 5678"
@@ -439,110 +362,52 @@ export default function RegisterCaseForm({
       {/* ─── STEP 1 : Inmobiliaria ───────────────────────────────────── */}
       {step === 1 && (
         <div className="space-y-5">
-          <Field>
-            <Label htmlFor="inmobiliariaId">Selecciona la inmobiliaria *</Label>
-            <Select
-              id="inmobiliariaId"
-              name="inmobiliariaId"
-              value={form.inmobiliariaId}
-              onChange={handleChange}
-              disabled={loadingInmobiliarias}
-            >
-              <option value="">
-                {loadingInmobiliarias
-                  ? "Cargando inmobiliarias..."
-                  : "Selecciona una inmobiliaria"}
-              </option>
-              {inmobiliarias.map((inm) => (
-                <option key={inm._id} value={inm._id}>
-                  {inm.name}
+          {showNewInmobiliaria ? (
+            <Field>
+              <Label htmlFor="suggestedCompany">Nombre de la inmobiliaria *</Label>
+              <Input
+                id="suggestedCompany"
+                name="suggestedCompany"
+                value={form.suggestedCompany}
+                onChange={handleChange}
+                maxLength={120}
+                placeholder="Nombre comercial"
+              />
+              <p className="mt-1 text-xs text-dark">
+                El equipo revisará esta sugerencia junto con tu reclamo.
+              </p>
+            </Field>
+          ) : (
+            <Field>
+              <Label htmlFor="inmobiliariaId">Selecciona la inmobiliaria *</Label>
+              <Select
+                id="inmobiliariaId"
+                name="inmobiliariaId"
+                value={form.inmobiliariaId}
+                onChange={handleChange}
+                disabled={loadingInmobiliarias}
+              >
+                <option value="">
+                  {loadingInmobiliarias ? "Cargando inmobiliarias..." : "Selecciona una inmobiliaria"}
                 </option>
-              ))}
-            </Select>
-            <ErrorText message={errors.inmobiliariaId} />
-          </Field>
+                {inmobiliarias.map((inm) => (
+                  <option key={inm._id} value={inm._id}>{inm.name}</option>
+                ))}
+              </Select>
+            </Field>
+          )}
+          <ErrorText message={errors.inmobiliariaId} />
 
-          {/* Toggle crear nueva */}
           <button
             type="button"
-            onClick={() => setShowNewInmobiliaria((prev) => !prev)}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-red transition hover:text-[#01a863] cursor-pointer"
+            onClick={() => {
+              setShowNewInmobiliaria((prev) => !prev);
+              setErrors((prev) => ({ ...prev, inmobiliariaId: "" }));
+            }}
+            className="text-sm font-semibold text-red underline-offset-2 hover:underline"
           >
-            <span className="flex h-5 w-5 items-center justify-center rounded-full border border-[#01c676]/40 text-xs">
-              {showNewInmobiliaria ? "−" : "+"}
-            </span>
-            {showNewInmobiliaria
-              ? "Cancelar registro"
-              : "¿No encuentras tu inmobiliaria? Regístrala aquí"}
+            {showNewInmobiliaria ? "Volver al catálogo" : "¿No encuentras tu inmobiliaria? Indica su nombre"}
           </button>
-
-          {/* Sub-formulario nueva inmobiliaria */}
-          {showNewInmobiliaria && (
-            <div className="space-y-4 rounded-[var(--radius-md)] border border-[#01c676]/20 bg-[#021f41]/40 p-5">
-              <p className="text-sm font-semibold text-[var(--color-text-primary)]">
-                Registrar nueva inmobiliaria
-              </p>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <Field>
-                  <Label htmlFor="newInm-rut">RUT de la inmobiliaria *</Label>
-                  <Input
-                    id="newInm-rut"
-                    name="rut"
-                    value={newInmobiliaria.rut}
-                    onChange={handleNewInmobiliariaChange}
-                    placeholder="76.123.456-7"
-                  />
-                  <ErrorText message={newInmobiliariaErrors.rut} />
-                </Field>
-
-                <Field>
-                  <Label htmlFor="newInm-name">Nombre *</Label>
-                  <Input
-                    id="newInm-name"
-                    name="name"
-                    value={newInmobiliaria.name}
-                    onChange={handleNewInmobiliariaChange}
-                    placeholder="Nombre de la inmobiliaria"
-                  />
-                  <ErrorText message={newInmobiliariaErrors.name} />
-                </Field>
-
-                <Field>
-                  <Label htmlFor="newInm-direccion">Dirección *</Label>
-                  <Input
-                    id="newInm-direccion"
-                    name="direccion"
-                    value={newInmobiliaria.direccion}
-                    onChange={handleNewInmobiliariaChange}
-                    placeholder="Av. Ejemplo 1234, Santiago"
-                  />
-                  <ErrorText message={newInmobiliariaErrors.direccion} />
-                </Field>
-
-                <Field>
-                  <Label htmlFor="newInm-contacto">Medio de contacto *</Label>
-                  <Input
-                    id="newInm-contacto"
-                    name="contacto"
-                    value={newInmobiliaria.contacto}
-                    onChange={handleNewInmobiliariaChange}
-                    placeholder="Email, teléfono o red social"
-                  />
-                  <ErrorText message={newInmobiliariaErrors.contacto} />
-                </Field>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleCreateInmobiliaria}
-                disabled={creatingInmobiliaria}
-                className="inline-flex items-center justify-center rounded-[var(--radius-md)] bg-red px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-white shadow-[0_4px_14px_0_rgba(1,198,118,0.39)] transition hover:bg-[#01a863] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {creatingInmobiliaria ? "Creando..." : "Registrar inmobiliaria"}
-              </button>
-            </div>
-          )}
 
           {/* Checkbox veracidad */}
           <div className="space-y-3 rounded-[var(--radius-md)] border border-[#01c676]/20 bg-white p-5">
@@ -608,6 +473,7 @@ export default function RegisterCaseForm({
             <Textarea
               id="issueDescription"
               name="issueDescription"
+              maxLength={5000}
               value={form.issueDescription}
               onChange={handleChange}
               placeholder="Describe detalladamente el incumplimiento o problema..."
@@ -622,6 +488,7 @@ export default function RegisterCaseForm({
             <Textarea
               id="expectedSolution"
               name="expectedSolution"
+              maxLength={2000}
               rows={3}
               value={form.expectedSolution}
               onChange={handleChange}
@@ -657,6 +524,7 @@ export default function RegisterCaseForm({
             <Textarea
               id="claimObjective"
               name="claimObjective"
+              maxLength={2000}
               rows={3}
               value={form.claimObjective}
               onChange={handleChange}
@@ -689,7 +557,7 @@ export default function RegisterCaseForm({
             <SummarySection title="Inmobiliaria">
               <SummaryRow
                 label="Inmobiliaria"
-                value={selectedInmobiliariaName}
+                value={showNewInmobiliaria ? form.suggestedCompany : selectedInmobiliariaName}
               />
             </SummarySection>
 
@@ -715,48 +583,39 @@ export default function RegisterCaseForm({
             </SummarySection>
           </div>
 
-          {/* Checkbox Terms */}
           <div className="space-y-3 rounded-[var(--radius-md)] border border-white/10 bg-white p-5">
-            <CheckboxRow>
+            <label className="flex items-start gap-3 text-sm text-dark">
               <input
                 id="acceptTerms"
                 name="acceptTerms"
                 type="checkbox"
                 checked={form.acceptTerms}
                 onChange={handleChange}
-                className="mt-1 h-5 w-5 shrink-0 accent-[#01c676] cursor-pointer"
+                className="mt-1 shrink-0 accent-red"
               />
-              <div>
-                <Label
-                  htmlFor="acceptTerms"
-                  className="cursor-pointer text-sm font-medium leading-relaxed"
-                >
-                  Estoy interesado en ser contactado y autorizo a promesa.cl a
-                  enviar y gestionar los datos de mi reclamo con:
-                  <ul className="list-disc pl-5 mt-2 mb-3 space-y-1 font-normal text-dark">
-                    <li>Empresas o instituciones aludidas</li>
-                    <li>Periodistas y medios de comunicación</li>
-                    <li>ONG para procesos de mediación colectiva</li>
-                  </ul>
-                  <span className="text-red">
-                    Además, acepto los términos y condiciones del servicio y
-                    declaro conocer la{" "}
-                    <Link
-                      href="/politica-privacidad"
-                      className="underline underline-offset-2 hover:opacity-80"
-                    >
-                      política de privacidad
-                    </Link>
-                    . *
-                  </span>
-                </Label>
-                <ErrorText message={errors.acceptTerms} />
-              </div>
-            </CheckboxRow>
+              <span>
+                Autorizo que TuPromesa.cl guarde mis datos para revisar este reclamo y
+                contactarme según su{" "}
+                <Link href="/politica-privacidad" className="underline underline-offset-2">
+                  política de privacidad
+                </Link>. *
+              </span>
+            </label>
+            <ErrorText message={errors.acceptTerms} />
+            <label className="flex items-start gap-3 text-sm text-dark">
+              <input
+                name="allowPublication"
+                type="checkbox"
+                checked={form.allowPublication}
+                onChange={handleChange}
+                className="mt-1 shrink-0 accent-red"
+              />
+              <span>Autorizo la publicación de una ficha anónima de mi reclamo después de su revisión (opcional).</span>
+            </label>
           </div>
 
           {submitError && (
-            <p className="text-sm font-medium text-red-400">{submitError}</p>
+            <p role="alert" className="text-sm font-medium text-red-700">{submitError}</p>
           )}
         </div>
       )}
@@ -783,9 +642,10 @@ export default function RegisterCaseForm({
             ¡Reclamo enviado exitosamente!
           </h2>
           <p className="text-sm leading-relaxed text-dark max-w-md mx-auto">
-            Tu caso ha sido registrado correctamente. Nuestro equipo lo revisará
-            y nos pondremos en contacto contigo a la brevedad.
+            Tu caso quedó pendiente de revisión. Guarda este folio para identificarlo.
           </p>
+
+          <p className="break-all text-sm font-bold text-dark">Folio {receipt}</p>
 
           <div className="pt-6">
             <button

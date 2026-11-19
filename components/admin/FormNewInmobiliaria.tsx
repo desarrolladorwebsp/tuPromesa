@@ -99,7 +99,7 @@ export default function FormNewInmobiliaria({ onSubmit, initialData }: Props) {
   return (
     <div className="rounded-[var(--radius-xl)] border border-white/10 bg-[var(--color-bg-surface)] p-5 shadow-[var(--shadow-medium)]">
       <h2 className="mb-4 text-xl font-bold text-[var(--color-text-primary)]">
-        Nueva inmobiliaria
+        {initialData ? "Editar inmobiliaria" : "Nueva inmobiliaria"}
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -184,7 +184,7 @@ export default function FormNewInmobiliaria({ onSubmit, initialData }: Props) {
           className="w-full rounded-[var(--radius-md)] bg-[var(--color-primary)] py-3 font-bold text-white transition hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={isCreating}
         >
-          {isCreating ? "Creando..." : "Crear"}
+          {isCreating ? "Guardando…" : initialData ? "Guardar cambios" : "Crear"}
         </button>
       </form>
     </div>

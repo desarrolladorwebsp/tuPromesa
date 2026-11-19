@@ -1,188 +1,309 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
+import {
+  publicationCategories, publicationResolutions,
+  type PublicationCategory, type PublicationResolution,
+} from "@/constants/cases";
 
-export type CaseRecord = {
+type CaseStatus = "pendiente" | "publicado" | "retirado";
+
+type CaseRecord = {
   _id: string;
-  firstName: string;
-  lastName: string;
-  rut: string;
-  email: string;
-  phone: string;
-  incidentDate: string;
-  claimedAmount: string;
-  issueDescription: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  rut?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  inmobiliariaId?: string | null;
   inmobiliariaName: string;
+  suggestedCompany?: string | null;
+  incidentDate?: string | null;
+  claimedAmount?: string | null;
+  issueDescription?: string | null;
+  expectedSolution?: string | null;
+  priorCommunication?: string | null;
+  claimObjective?: string | null;
+  acceptTerms?: boolean | null;
+  declaracionVeracidad?: boolean | null;
+  allowPublication?: boolean | null;
   createdAt?: string;
+  status: CaseStatus;
+  revision: number;
+  publication?: {
+    category: PublicationCategory;
+    resolution: PublicationResolution;
+    companyId: string;
+  };
 };
 
-type Props = {
-  onViewDetail?: (caseItem: CaseRecord) => void;
-  onDelete?: (id: string) => void;
+type CompanyOption = { _id: string; name: string; status: string };
+const statusLabel: Record<CaseStatus, string> = {
+  pendiente: "Pendiente de revisión",
+  publicado: "Publicado",
+  retirado: "Retirado",
 };
 
-export default function CasesList({ onViewDetail, onDelete }: Props) {
+const fieldClass = "w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-white";
+
+export default function CasesList({ companies }: { companies: CompanyOption[] }) {
   const [cases, setCases] = useState<CaseRecord[]>([]);
   const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<CaseStatus | "todos">("todos");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    async function fetchCases() {
-      try {
-        setIsLoading(true);
-        const res = await fetch("/api/case");
-
-        if (!res.ok) throw new Error("Error al obtener los casos");
-
-        const data = await res.json();
-        setCases(Array.isArray(data) ? data : data.casos || []);
-      } catch (err: any) {
-        setError(err.message || "Error de conexión");
-      } finally {
-        setIsLoading(false);
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch("/api/case", { cache: "no-store" });
+      if (res.status === 401) {
+        window.location.assign("/login");
+        return;
       }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudieron cargar los reclamos.");
+      setCases(data.casos);
+      setError("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudieron cargar los reclamos.");
+    } finally {
+      setIsLoading(false);
     }
-
-    fetchCases();
   }, []);
 
-  const filtered = useMemo(() => {
-    const term = search.toLowerCase();
-    return cases.filter(
-      (c) =>
-        c.firstName.toLowerCase().includes(term) ||
-        c.lastName.toLowerCase().includes(term) ||
-        c.rut.toLowerCase().includes(term) ||
-        c.email.toLowerCase().includes(term),
-    );
-  }, [cases, search]);
+  useEffect(() => { void load(); }, [load]);
 
-  function handleDeleteConfirm(id: string) {
-    if (!confirm("¿Eliminar este caso? Esta acción no se puede deshacer."))
-      return;
-    onDelete?.(id);
-    setCases((prev) => prev.filter((c) => c._id !== id));
-  }
+  const query = search.trim().toLocaleLowerCase("es-CL");
+  const filtered = cases.filter((item) =>
+    (filter === "todos" || item.status === filter) &&
+    [item._id, item.firstName, item.lastName, item.email, item.rut, item.inmobiliariaName]
+      .some((value) => value?.toLocaleLowerCase("es-CL").includes(query)),
+  );
+  const selected = cases.find((item) => item._id === selectedId);
 
   return (
-    <div className="bg-[var(--color-bg-surface)] p-6 rounded-2xl border border-white/10 shadow-xl mt-8">
-      {/* HEADER */}
-      <div className="flex flex-col lg:flex-row justify-between gap-4 mb-6">
+    <section className="mt-8 space-y-5 rounded-2xl border border-white/10 bg-surface p-5 sm:p-6">
+      <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">Casos</h2>
-          <p className="text-sm text-gray-400">
-            Gestiona y revisa los reclamos registrados
-          </p>
+          <h2 className="text-2xl font-bold">Reclamos</h2>
+          <p className="mt-1 text-sm text-white/65">Revisa los antecedentes y aprueba las fichas anónimas autorizadas.</p>
         </div>
-
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar..."
-          className="w-full lg:w-80 px-4 py-2 bg-black/30 border border-white/10 rounded-lg text-white placeholder:text-gray-500 outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] transition"
-        />
-      </div>
-
-      {/* STATES */}
-      {isLoading && (
-        <p className="text-center text-gray-400 py-10">Cargando casos...</p>
-      )}
-
-      {error && <p className="text-center text-red-400 py-10">{error}</p>}
-
-      {!isLoading && !error && filtered.length === 0 && (
-        <p className="text-center text-gray-400 py-10">No hay resultados</p>
-      )}
-
-      {/* GRID DASHBOARD */}
-      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
-        {filtered.map((c, i) => (
-          <div
-            key={c._id}
-            className="group relative bg-black/30 border border-white/10 rounded-2xl p-5 hover:border-[var(--color-primary)] hover:shadow-[0_0_20px_rgba(255,0,0,0.15)] transition-all duration-300"
-            style={{
-              animation: `fadeUp 0.4s ease forwards`,
-              animationDelay: `${i * 0.05}s`,
-              opacity: 0,
-            }}
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <input
+            aria-label="Buscar reclamos"
+            placeholder="Buscar por folio o contacto"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            className={fieldClass}
+          />
+          <select
+            aria-label="Estado del reclamo"
+            value={filter}
+            onChange={(event) => setFilter(event.target.value as CaseStatus | "todos")}
+            className={fieldClass}
           >
-            {/* TOP */}
-            <div className="flex justify-between items-start mb-3">
-              <div>
-                <p className="text-white font-semibold">
-                  {c.firstName} {c.lastName}
-                </p>
-                <p className="text-xs text-gray-500">{c.email}</p>
-              </div>
+            <option value="todos">Todos los estados</option>
+            {Object.entries(statusLabel).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+          </select>
+        </div>
+      </header>
 
-              <span className="text-xs px-2 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
-                Activo
-              </span>
-            </div>
+      {isLoading && <p role="status">Cargando reclamos…</p>}
+      {error && <p role="alert" className="text-red-300">{error}</p>}
+      {!isLoading && !error && !filtered.length && <p className="text-sm text-white/65">No hay reclamos para mostrar.</p>}
 
-            {/* INFO */}
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between text-gray-400">
-                <span>RUT</span>
-                <span className="text-gray-200">{c.rut}</span>
-              </div>
-
-              <div className="flex justify-between text-gray-400">
-                <span>Monto</span>
-                <span className="text-white font-medium">
-                  {c.claimedAmount}
-                </span>
-              </div>
-
-              <div className="flex justify-between text-gray-400">
-                <span>Inmobiliaria</span>
-                <span className="text-[var(--color-primary)] font-medium">
-                  {c.inmobiliariaName}
-                </span>
-              </div>
-            </div>
-
-            {/* DESCRIPTION */}
-            <p className="text-xs text-gray-500 mt-3 line-clamp-2">
-              {c.issueDescription}
-            </p>
-
-            {/* ACTIONS */}
-            <div className="flex justify-between items-center mt-4 pt-3 border-t border-white/5">
-              <button
-                onClick={() => onViewDetail?.(c)}
-                className="text-sm text-[var(--color-primary)] hover:opacity-80 transition cursor-pointer"
-              >
-                Ver detalle →
-              </button>
-
-              {onDelete && (
-                <button
-                  onClick={() => handleDeleteConfirm(c._id)}
-                  className="text-sm text-red-400 hover:text-red-300 transition"
-                >
-                  Eliminar
-                </button>
-              )}
-            </div>
-          </div>
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {filtered.map((item) => (
+          <article key={item._id} className="space-y-2 rounded-xl border border-white/10 bg-black/25 p-4">
+            <p className="text-sm font-bold">{item.inmobiliariaName}</p>
+            <p className="text-sm text-white/70">{[item.firstName, item.lastName].filter(Boolean).join(" ") || "Sin nombre"}</p>
+            <p className="text-xs text-white/55">Folio {item._id}</p>
+            <p className="text-xs text-white/75">{statusLabel[item.status]}</p>
+            <button
+              type="button"
+              onClick={() => setSelectedId(item._id)}
+              className="rounded-md border border-white/20 px-3 py-1.5 text-sm font-semibold hover:bg-white/10"
+            >
+              Ver detalle
+            </button>
+          </article>
         ))}
       </div>
 
-      {/* ANIMATION */}
-      <style jsx>{`
-        @keyframes fadeUp {
-          from {
-            transform: translateY(10px);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(0);
-            opacity: 1;
-          }
-        }
-      `}</style>
-    </div>
+      {selected && (
+        <CaseReview
+          key={selected._id}
+          item={selected}
+          companies={companies.filter((company) => company.status === "Activa")}
+          onRefresh={load}
+          onClose={() => setSelectedId(null)}
+        />
+      )}
+    </section>
+  );
+}
+
+function CaseReview({
+  item, companies, onRefresh, onClose,
+}: {
+  item: CaseRecord;
+  companies: CompanyOption[];
+  onRefresh: () => Promise<void>;
+  onClose: () => void;
+}) {
+  const [category, setCategory] = useState<PublicationCategory | "">(item.publication?.category ?? "");
+  const [resolution, setResolution] = useState<PublicationResolution>(item.publication?.resolution ?? "ninguna");
+  const [selectedCompanyId, setSelectedCompanyId] = useState(item.publication?.companyId ?? "");
+  const [confirmed, setConfirmed] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState<{ ok: boolean; message: string } | null>(null);
+
+  const companyId = item.inmobiliariaId || selectedCompanyId;
+  const company = companies.find((option) => option._id === companyId);
+  const preview = category ? publicationCategories[category] : null;
+  const fields = [
+    ["Nombre", [item.firstName, item.lastName].filter(Boolean).join(" ")],
+    ["RUT", item.rut], ["Correo", item.email], ["Teléfono", item.phone],
+    ["Inmobiliaria reportada", item.inmobiliariaName], ["Sugerencia de empresa", item.suggestedCompany],
+    ["Fecha de los hechos", item.incidentDate], ["Monto reclamado", item.claimedAmount],
+    ["Relato original", item.issueDescription], ["Solución esperada", item.expectedSolution],
+    ["Comunicación previa", item.priorCommunication], ["Objetivo", item.claimObjective],
+    ["Tratamiento de datos", item.acceptTerms ? "Autorizado" : "Sin constancia"],
+    ["Declaración de veracidad", item.declaracionVeracidad ? "Registrada" : "Sin constancia"],
+    ["Publicación anónima", item.allowPublication ? "Autorizada" : "Sin autorización"],
+  ];
+
+  async function update(action: "publish" | "withdraw") {
+    if (saving) return;
+    setSaving(true);
+    setFeedback(null);
+    try {
+      const res = await fetch("/api/case", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: item._id, revision: item.revision, action, category, resolution, companyId, confirmed }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        if (res.status === 409) await onRefresh();
+        throw new Error(data.error || "No se pudo guardar la decisión.");
+      }
+      await onRefresh();
+      setConfirmed(false);
+      setFeedback({ ok: true, message: action === "publish" ? "Ficha aprobada y publicada." : "Ficha retirada de la web." });
+    } catch (error) {
+      setFeedback({ ok: false, message: error instanceof Error ? error.message : "No se pudo guardar la decisión." });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function publish(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (confirmed && preview && company) void update("publish");
+  }
+
+  return (
+    <section aria-label="Detalle del reclamo" className="grid gap-5 rounded-xl border border-white/15 bg-black/30 p-4 lg:grid-cols-2">
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className="text-lg font-bold">Detalle privado</h3>
+            <p className="text-xs text-white/65">Folio {item._id} · {statusLabel[item.status]}</p>
+          </div>
+          <button type="button" onClick={onClose} className="text-sm font-semibold underline">Cerrar detalle</button>
+        </div>
+        <dl className="space-y-3 break-words">
+          {fields.map(([label, value]) => (
+            <div key={label}>
+              <dt className="text-xs font-bold text-white/65">{label}</dt>
+              <dd className="whitespace-pre-wrap text-sm">{value || "—"}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <form onSubmit={publish} className="space-y-4 rounded-lg border border-white/10 bg-surface p-4">
+        <h3 className="text-lg font-bold">Ficha pública anónima</h3>
+        <p className="text-sm text-white/65">La ficha muestra la inmobiliaria, la categoría y la solicitud que selecciones.</p>
+        {item.allowPublication ? (
+          <>
+            <label className="block space-y-1 text-sm font-medium">
+              Inmobiliaria de la ficha
+              {item.inmobiliariaId ? (
+                <span className="block">{company?.name ?? "Inmobiliaria fuera del catálogo activo"}</span>
+              ) : (
+                <select className={fieldClass} value={selectedCompanyId} onChange={(event) => {
+                  setSelectedCompanyId(event.target.value);
+                  setConfirmed(false);
+                }} required>
+                  <option value="">Selecciona una inmobiliaria activa</option>
+                  {companies.map((option) => <option key={option._id} value={option._id}>{option.name}</option>)}
+                </select>
+              )}
+            </label>
+
+            <label className="block space-y-1 text-sm font-medium">
+              Categoría pública
+              <select className={fieldClass} value={category} onChange={(event) => {
+                setCategory(event.target.value as PublicationCategory | "");
+                setConfirmed(false);
+              }} required>
+                <option value="">Selecciona una categoría</option>
+                {Object.entries(publicationCategories).map(([key, value]) => <option key={key} value={key}>{value.title}</option>)}
+              </select>
+            </label>
+
+            <label className="block space-y-1 text-sm font-medium">
+              Solicitud pública
+              <select className={fieldClass} value={resolution} onChange={(event) => {
+                setResolution(event.target.value as PublicationResolution);
+                setConfirmed(false);
+              }}>
+                {Object.entries(publicationResolutions).map(([key, value]) => <option key={key} value={key}>{value || "Omitir solicitud"}</option>)}
+              </select>
+            </label>
+
+            {preview && company && (
+              <div className="space-y-1 rounded-lg border border-white/15 bg-black/30 p-3">
+                <p className="text-xs font-semibold text-white/65">Vista previa pública</p>
+                <p className="font-bold">{company.name}</p>
+                <p className="text-sm font-semibold">{preview.title}</p>
+                <p className="text-sm">{preview.summary} {publicationResolutions[resolution]}</p>
+              </div>
+            )}
+
+            <label className="flex items-start gap-2 text-sm">
+              <input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} className="mt-1" />
+              Revisé la ficha y confirmo que representa el reclamo.
+            </label>
+
+            <button
+              type="submit"
+              disabled={saving || !confirmed || !preview || !company}
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+            >
+              {item.status === "publicado" ? "Actualizar ficha pública" : "Aprobar y publicar"}
+            </button>
+          </>
+        ) : (
+          <p className="text-sm text-white/75">Este reclamo puede revisarse en privado. Para publicarlo hace falta la autorización del denunciante.</p>
+        )}
+
+        {item.status === "publicado" && (
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() => void update("withdraw")}
+            className="block rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold disabled:opacity-50"
+          >
+            Retirar publicación
+          </button>
+        )}
+
+        {feedback && <p role={feedback.ok ? "status" : "alert"} className={feedback.ok ? "text-sm text-green-300" : "text-sm text-red-300"}>{feedback.message}</p>}
+      </form>
+    </section>
   );
 }

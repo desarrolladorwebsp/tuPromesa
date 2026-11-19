@@ -30,8 +30,8 @@ export default function InmobiliariasList({
     const term = search.toLowerCase();
     return companies.filter(
       (c) =>
-        c.name.toLowerCase().includes(term) ||
-        c.slug.toLowerCase().includes(term),
+        (c.name ?? "").toLowerCase().includes(term) ||
+        (c.slug ?? "").toLowerCase().includes(term),
     );
   }, [companies, search]);
 

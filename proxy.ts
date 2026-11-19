@@ -1,19 +1,13 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { adminCookie, privateResponseHeaders, validAdminSession } from "@/lib/auth/admin";
 
 export function proxy(req: NextRequest) {
-  const isAdminRoute = req.nextUrl.pathname.startsWith("/admin");
+  const response = validAdminSession(req.cookies.get(adminCookie)?.value)
+    ? NextResponse.next()
+    : NextResponse.redirect(new URL("/login", req.url));
 
-  if (!isAdminRoute) return NextResponse.next();
-
-  const isLogin = req.nextUrl.pathname === "/login";
-  const auth = req.cookies.get("admin_auth");
-
-  if (!auth && !isLogin) {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
-
-  return NextResponse.next();
+  response.headers.set("Cache-Control", privateResponseHeaders["Cache-Control"]);
+  return response;
 }
 
 export const config = {

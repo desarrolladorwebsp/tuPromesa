@@ -5,105 +5,101 @@ import FormNewInmobiliaria from "@/components/admin/FormNewInmobiliaria";
 import InmobiliariasList from "@/components/admin/InmobiliariasList";
 import CasesList from "@/components/admin/CasesList";
 
-type RealEstateCompany = {
-  _id: string;
+type CompanyFields = {
   name: string;
-  slug: string;
   observation: string;
   logoUrl: string;
   website: string;
   status: "Activa" | "Oculta";
-  createdAt: string;
 };
+type Company = CompanyFields & { _id: string; slug: string; createdAt: string };
 
 export default function AdminPage() {
-  const [companies, setCompanies] = useState<RealEstateCompany[]>([]);
-  const [editingId, setEditingId] = useState<string | null>(null);
-
-  /* ================= LOAD ================= */
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [editing, setEditing] = useState<Company | undefined>();
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch("/api/inmobiliarias");
-        const data = await res.json();
-        setCompanies(data);
-      } catch (error) {
-        console.log(error);
-      }
-    }
-
-    load();
+    fetch("/api/inmobiliarias?admin=1", { cache: "no-store" })
+      .then(async (res) => {
+        if (!res.ok) throw new Error("No se pudo cargar el catálogo.");
+        setCompanies(await res.json());
+      })
+      .catch(() => setError("No se pudo cargar el catálogo."));
   }, []);
 
-  /* ================= HANDLERS ================= */
-
-  async function handleCreate(data: any) {
+  async function saveCompany(data: CompanyFields) {
     try {
       const res = await fetch("/api/inmobiliarias", {
-        method: "POST",
-        body: JSON.stringify(data),
+        method: editing ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editing ? { ...data, id: editing._id } : data),
       });
-
       const result = await res.json();
+      if (!res.ok || !result.ok) throw new Error(result.error || "No se pudo guardar la inmobiliaria.");
 
-      setCompanies((prev) => [
-        {
-          _id: result.id,
-          ...data,
-          createdAt: new Date().toISOString(),
-        },
-        ...prev,
-      ]);
+      const company = { ...data, _id: editing?._id ?? result.id, slug: editing?.slug ?? "", createdAt: editing?.createdAt ?? new Date().toISOString() };
+      setCompanies((prev) => editing ? prev.map((entry) => entry._id === editing._id ? company : entry) : [company, ...prev]);
+      setEditing(undefined);
+      setError("");
       return { success: true };
     } catch (error) {
-      console.log(error);
+      setError(error instanceof Error ? error.message : "No se pudo guardar la inmobiliaria.");
       return { success: false };
     }
   }
 
-  async function handleDelete(id: string) {
+  async function deleteCompany(id: string) {
     try {
-      await fetch("/api/inmobiliarias", {
+      const res = await fetch("/api/inmobiliarias", {
         method: "DELETE",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
-
+      if (!res.ok) throw new Error();
       setCompanies((prev) => prev.filter((c) => c._id !== id));
-    } catch (error) {
-      console.log(error);
+      if (editing?._id === id) setEditing(undefined);
+      setError("");
+    } catch {
+      setError("No se pudo eliminar la inmobiliaria.");
     }
   }
 
-  function handleEdit(company: RealEstateCompany) {
-    setEditingId(company._id);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  async function logout() {
+    try {
+      const res = await fetch("/api/logout", { method: "POST" });
+      if (!res.ok) throw new Error();
+      window.location.assign("/login");
+    } catch {
+      setError("No se pudo cerrar la sesión. Inténtalo de nuevo.");
+    }
   }
-
-  const editingData = companies.find((c) => c._id === editingId);
-
-  /* ================= UI ================= */
 
   return (
     <main className="min-h-screen bg-elevated text-white">
       <div className="mx-auto max-w-7xl px-4 py-8">
-        <header className="mb-8 border-b border-white/10 pb-6">
-          <h1 className="text-3xl font-bold">Panel Admin</h1>
-          <p className="text-sm text-gray-400 mt-2">
-            Gestiona inmobiliarias y logos
-          </p>
+        <header className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-6">
+          <div>
+            <h1 className="text-3xl font-bold">Panel de administración</h1>
+            <p className="mt-2 text-sm text-gray-400">Reclamos, publicaciones e inmobiliarias</p>
+          </div>
+          <button type="button" onClick={logout} className="rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold">
+            Cerrar sesión
+          </button>
         </header>
-        <CasesList />
 
-        <section className="grid gap-6 xl:grid-cols-[420px_1fr] mt-8">
-          {/* FORM */}
-          <FormNewInmobiliaria onSubmit={handleCreate} />
+        {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
+        <CasesList companies={companies} />
 
-          {/* LIST COMPONENT */}
+        <section className="mt-8 grid gap-6 xl:grid-cols-[420px_1fr]">
+          <div>
+            {editing && <button type="button" onClick={() => setEditing(undefined)} className="mb-2 text-sm underline">Cancelar edición</button>}
+            <FormNewInmobiliaria onSubmit={saveCompany} initialData={editing} />
+          </div>
           <InmobiliariasList
             companies={companies}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
+            onEdit={(company) => setEditing(company)}
+            onDelete={deleteCompany}
           />
         </section>
       </div>

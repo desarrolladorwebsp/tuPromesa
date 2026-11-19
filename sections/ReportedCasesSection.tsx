@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import VoteButton from "@/components/VoteButton";
 import FeaturedCase from "@/components/FeaturedCase";
+import type { PublicCase } from "@/constants/cases";
 
 interface Inmobiliaria {
   _id: string;
@@ -88,7 +89,8 @@ const cases = [
 
 export default function ReportedCasesSection() {
   const [pollOptions, setPollOptions] = useState<Inmobiliaria[]>([]);
-  const [companies, setCompanies] = useState<string[]>([]);
+  const [publishedCases, setPublishedCases] = useState<PublicCase[]>([]);
+  const companies = pollOptions.map((item) => item.logoUrl).filter(Boolean);
   useEffect(() => {
     async function load() {
       try {
@@ -97,15 +99,25 @@ export default function ReportedCasesSection() {
         });
         const data = await res.json();
 
-        console.log("data: ----->", data[0]);
-        setPollOptions(data);
-        setCompanies(data.map((item: Inmobiliaria) => item.logoUrl));
+        if (res.ok && Array.isArray(data)) setPollOptions(data);
       } catch (error) {
         console.error("Error cargando inmobiliarias", error);
       }
     }
 
-    load();
+    async function loadPublished() {
+      try {
+        const res = await fetch("/api/case/publicados", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data.cases)) setPublishedCases(data.cases);
+      } catch {
+        // Los reclamos con fuentes externas siguen disponibles.
+      }
+    }
+
+    void load();
+    void loadPublished();
   }, []);
   return (
     <section className="relative overflow-hidden bg-elevated py-14 md:py-20">
@@ -125,6 +137,18 @@ export default function ReportedCasesSection() {
               Reclamos publicados por usuarios
             </h2>
             <div className="mt-2 grid grid-cols-1 gap-4">
+              {publishedCases.map((item) => (
+                <article key={item.id} className="rounded-md border border-default bg-light p-4 text-dark">
+                  <h3 className="font-semibold text-red">{item.companyName}</h3>
+                  <p className="mt-1 text-xs text-dark/75">
+                    Ficha anónima · <time dateTime={item.month}>{item.month}</time>
+                  </p>
+                  <h4 className="mt-2 text-sm font-bold">{item.title}</h4>
+                  <p className="mt-1 text-sm leading-relaxed">
+                    {item.summary} {item.requestedResolution}
+                  </p>
+                </article>
+              ))}
               {cases.map((caseItem) => (
                 <FeaturedCase
                   key={caseItem.sourceUrl}
@@ -159,13 +183,15 @@ export default function ReportedCasesSection() {
                   className="flex w-full items-center justify-between gap-3 rounded-lg border border-white/8 bg-white/[0.03] px-4 py-3 text-left transition-all hover:border-white/15 hover:bg-white/[0.06] cursor-pointer"
                 >
                   <span className="flex items-center gap-2.5 text-sm font-medium text-[var(--color-text-primary)]">
-                    <Image
-                      src={item.logoUrl}
-                      alt={item.name}
-                      width={96}
-                      height={96}
-                      className="shrink-0 rounded-sm"
-                    />
+                    {item.logoUrl && (
+                      <Image
+                        src={item.logoUrl}
+                        alt=""
+                        width={96}
+                        height={96}
+                        className="shrink-0 rounded-sm"
+                      />
+                    )}
                     {item.name}
                   </span>
 
