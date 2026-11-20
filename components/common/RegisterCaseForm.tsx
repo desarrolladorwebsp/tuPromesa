@@ -69,7 +69,7 @@ const initialForm: CaseFormData = {
 
 // ─── Main Component ─────────────────────────────────────────────────────────
 
-export default function RegisterCaseForm() {
+export default function RegisterCaseForm({ legalEvaluation = false }: { legalEvaluation?: boolean }) {
   const [form, setForm] = useState<CaseFormData>(initialForm);
   const [errors, setErrors] = useState<
     Partial<Record<keyof CaseFormData | string, string>>
@@ -242,6 +242,7 @@ export default function RegisterCaseForm() {
           inmobiliariaId: showNewInmobiliaria ? "" : form.inmobiliariaId,
           suggestedCompany: showNewInmobiliaria ? form.suggestedCompany : "",
           submissionKey: submissionKey.current,
+          legalEvaluation,
         }),
       });
       const data = await res.json().catch(() => null);
@@ -558,7 +559,7 @@ export default function RegisterCaseForm() {
           {/* Resumen */}
           <div className="space-y-4 rounded-[var(--radius-md)] border border-white/10 bg-[#181818] p-5">
             <h3 className="text-base font-bold text-[var(--color-text-primary)]">
-              Resumen de tu reclamo
+              {legalEvaluation ? "Resumen de la solicitud de evaluación" : "Resumen de tu reclamo"}
             </h3>
 
             <SummarySection title="Datos personales">
@@ -656,10 +657,12 @@ export default function RegisterCaseForm() {
             </svg>
           </div>
           <h3 ref={stepHeading} tabIndex={-1} className="scroll-mt-28 text-2xl font-extrabold text-white focus:outline-none">
-            Reclamo enviado
+            {legalEvaluation ? "Solicitud de evaluación recibida" : "Reclamo enviado"}
           </h3>
           <p className="text-sm leading-relaxed text-[#e4e4e7] max-w-md mx-auto">
-            Tu caso quedó pendiente de revisión. Guarda este folio para identificarlo.
+            {legalEvaluation
+              ? "La solicitud quedó pendiente de revisión. Si necesitas consultar por ella, escribe a contacto@tupromesa.cl con tu folio."
+              : "Tu caso quedó pendiente de revisión. Guarda este folio para identificarlo."}
           </p>
 
           <p className="break-all text-sm font-bold text-[#e4e4e7]">Folio {receipt}</p>
@@ -688,7 +691,7 @@ export default function RegisterCaseForm() {
               </button>
             ) : (
               <button type="submit" disabled={!form.acceptTerms || isSubmitting} className={primaryButtonStyle}>
-                {isSubmitting ? "Enviando…" : "Enviar mi caso"}
+                {isSubmitting ? "Enviando…" : legalEvaluation ? "Solicitar evaluación" : "Enviar mi caso"}
                 <ArrowRight size={17} aria-hidden="true" />
               </button>
             )}

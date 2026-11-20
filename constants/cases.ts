@@ -45,3 +45,15 @@ export function isPublicationCategory(value: unknown): value is PublicationCateg
 export function isPublicationResolution(value: unknown): value is PublicationResolution {
   return typeof value === "string" && Object.hasOwn(publicationResolutions, value);
 }
+
+export const legalReviewLabels = {
+  solicitada: "Solicitada",
+  en_revision: "En revisión",
+  cerrada: "Cerrada",
+} as const;
+
+export type LegalReviewStatus = keyof typeof legalReviewLabels;
+
+export function isLegalReviewStatus(value: unknown): value is LegalReviewStatus {
+  return typeof value === "string" && Object.hasOwn(legalReviewLabels, value);
+}

@@ -2,14 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import CaseSectionLink from "@/components/common/CaseSectionLink";
-
-const legalPoints = [
-  "Evaluación inicial de antecedentes y viabilidad del caso",
-  "Orientación legal frente a incumplimientos y cambios de condiciones",
-  "Acompañamiento en reclamos, gestiones y acciones colectivas",
-  "Revisión de contratos, promesas, anexos y respaldos documentales",
-];
+import Link from "next/link";
 
 export default function LegalSupportSection() {
   return (
@@ -30,46 +23,16 @@ export default function LegalSupportSection() {
 
           <div>
             <h2 className="max-w-3xl text-3xl font-extrabold leading-tight text-[var(--color-text-primary)] sm:text-4xl md:text-5xl">
-              Tu caso no solo se visibiliza:
-              <span className="block">
-                también puede ser evaluado por un equipo legal.
-              </span>
+              Solicita una evaluación jurídica de tu caso
             </h2>
 
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-[var(--color-text-secondary)] sm:text-lg">
-              Tu caso puede ser revisado por{" "}
-              <span className="font-semibold text-[var(--color-text-primary)]">
-                estudios jurídicos
-              </span>{" "}
-              para evaluar los antecedentes y orientar a las personas afectadas
-              por incumplimientos inmobiliarios.
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-white-secondary sm:text-lg">
+              El equipo de TuPromesa revisará los antecedentes de tu solicitud. Si procede una derivación a un estudio jurídico, la coordinará contigo.
             </p>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            {legalPoints.map((item, index) => (
-              <motion.div
-                key={item}
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.25 }}
-                transition={{ duration: 0.35, delay: index * 0.06 }}
-                className="rounded-[var(--radius-lg)] border border-white/10 bg-[var(--color-bg-surface)]/75 p-4 shadow-[var(--shadow-soft)] backdrop-blur-sm"
-              >
-                <div className="flex items-start gap-3">
-                  <span className="mt-1 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gold/15 text-sm font-bold text-gold">
-                    ✓
-                  </span>
-                  <p className="text-sm font-medium leading-relaxed text-[var(--color-text-primary)] sm:text-base">
-                    {item}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
           <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
-            <CaseSectionLink label="Solicitar evaluación de mi caso" />
+            <Link href="/evaluacion-juridica" className="inline-flex justify-center rounded-md bg-red px-6 py-3 font-bold text-white hover:bg-red-hover">Solicitar evaluación de mi caso</Link>
           </div>
         </motion.div>
 
@@ -98,8 +61,7 @@ export default function LegalSupportSection() {
                     Estudios jurídicos
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                    Apoyo legal para la revisión de antecedentes, orientación y
-                    posibles acciones frente a incumplimientos inmobiliarios.
+                    Revisión de antecedentes y eventual derivación, según el caso.
                   </p>
                 </div>
 
@@ -108,7 +70,7 @@ export default function LegalSupportSection() {
                     Enfoque
                   </p>
                   <p className="mt-1 text-sm font-semibold text-[var(--color-text-primary)]">
-                    Defensa, orientación y acción colectiva
+                    Evaluación inicial de antecedentes
                   </p>
                 </div>
               </div>

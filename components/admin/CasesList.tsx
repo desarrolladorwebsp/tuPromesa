@@ -2,7 +2,8 @@
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import {
-  publicationCategories, publicationResolutions,
+  legalReviewLabels, publicationCategories, publicationResolutions,
+  type LegalReviewStatus,
   type PublicationCategory, type PublicationResolution,
 } from "@/constants/cases";
 
@@ -30,6 +31,7 @@ type CaseRecord = {
   createdAt?: string;
   status: CaseStatus;
   revision: number;
+  legalReview?: { status: LegalReviewStatus };
   publication?: {
     category: PublicationCategory;
     resolution: PublicationResolution;
@@ -50,6 +52,7 @@ export default function CasesList({ companies }: { companies: CompanyOption[] })
   const [cases, setCases] = useState<CaseRecord[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<CaseStatus | "todos">("todos");
+  const [onlyLegal, setOnlyLegal] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -77,6 +80,7 @@ export default function CasesList({ companies }: { companies: CompanyOption[] })
   const query = search.trim().toLocaleLowerCase("es-CL");
   const filtered = cases.filter((item) =>
     (filter === "todos" || item.status === filter) &&
+    (!onlyLegal || item.legalReview) &&
     [item._id, item.firstName, item.lastName, item.email, item.rut, item.inmobiliariaName]
       .some((value) => value?.toLocaleLowerCase("es-CL").includes(query)),
   );
@@ -108,6 +112,10 @@ export default function CasesList({ companies }: { companies: CompanyOption[] })
           </select>
         </div>
       </header>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={onlyLegal} onChange={(event) => setOnlyLegal(event.target.checked)} />
+        Solo solicitudes de evaluación jurídica
+      </label>
 
       {isLoading && <p role="status">Cargando reclamos…</p>}
       {error && <p role="alert" className="text-red-300">{error}</p>}
@@ -120,6 +128,7 @@ export default function CasesList({ companies }: { companies: CompanyOption[] })
             <p className="text-sm text-white/70">{[item.firstName, item.lastName].filter(Boolean).join(" ") || "Sin nombre"}</p>
             <p className="text-xs text-white/55">Folio {item._id}</p>
             <p className="text-xs text-white/75">{statusLabel[item.status]}</p>
+            {item.legalReview && <p className="text-xs text-amber-200">Evaluación jurídica · {legalReviewLabels[item.legalReview.status]}</p>}
             <button
               type="button"
               onClick={() => setSelectedId(item._id)}
@@ -156,8 +165,9 @@ function CaseReview({
   const [resolution, setResolution] = useState<PublicationResolution>(item.publication?.resolution ?? "ninguna");
   const [selectedCompanyId, setSelectedCompanyId] = useState(item.publication?.companyId ?? "");
   const [confirmed, setConfirmed] = useState(false);
+  const [legalStatus, setLegalStatus] = useState(item.legalReview?.status);
   const [saving, setSaving] = useState(false);
-  const [feedback, setFeedback] = useState<{ ok: boolean; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ ok: boolean; message: string; legal: boolean } | null>(null);
 
   const companyId = item.inmobiliariaId || selectedCompanyId;
   const company = companies.find((option) => option._id === companyId);
@@ -174,7 +184,7 @@ function CaseReview({
     ["Publicación anónima", item.allowPublication ? "Autorizada" : "Sin autorización"],
   ];
 
-  async function update(action: "publish" | "withdraw") {
+  async function update(action: "publish" | "withdraw" | "legal-review") {
     if (saving) return;
     setSaving(true);
     setFeedback(null);
@@ -182,7 +192,7 @@ function CaseReview({
       const res = await fetch("/api/case", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: item._id, revision: item.revision, action, category, resolution, companyId, confirmed }),
+        body: JSON.stringify({ id: item._id, revision: item.revision, action, category, resolution, companyId, confirmed, legalStatus }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -191,9 +201,9 @@ function CaseReview({
       }
       await onRefresh();
       setConfirmed(false);
-      setFeedback({ ok: true, message: action === "publish" ? "Ficha aprobada y publicada." : "Ficha retirada de la web." });
+      setFeedback({ ok: true, legal: action === "legal-review", message: action === "publish" ? "Ficha aprobada y publicada." : action === "withdraw" ? "Ficha retirada de la web." : "Estado de evaluación guardado." });
     } catch (error) {
-      setFeedback({ ok: false, message: error instanceof Error ? error.message : "No se pudo guardar la decisión." });
+      setFeedback({ ok: false, legal: action === "legal-review", message: error instanceof Error ? error.message : "No se pudo guardar la decisión." });
     } finally {
       setSaving(false);
     }
@@ -214,6 +224,23 @@ function CaseReview({
           </div>
           <button type="button" onClick={onClose} className="text-sm font-semibold underline">Cerrar detalle</button>
         </div>
+        {item.legalReview && (
+          <form className="space-y-3 rounded-lg border border-white/15 p-3" onSubmit={(event) => {
+            event.preventDefault();
+            void update("legal-review");
+          }}>
+            <label className="block space-y-1 text-sm font-medium">
+              Estado de evaluación jurídica
+              <select className={fieldClass} value={legalStatus} onChange={(event) => setLegalStatus(event.target.value as LegalReviewStatus)}>
+                {Object.entries(legalReviewLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+              </select>
+            </label>
+            <button type="submit" disabled={saving || legalStatus === item.legalReview.status} className="rounded-md border border-white/20 px-3 py-2 text-sm font-semibold disabled:opacity-50">
+              Guardar estado
+            </button>
+            {feedback?.legal && <p role={feedback.ok ? "status" : "alert"} className={feedback.ok ? "text-sm text-green-300" : "text-sm text-red-300"}>{feedback.message}</p>}
+          </form>
+        )}
         <dl className="space-y-3 break-words">
           {fields.map(([label, value]) => (
             <div key={label}>
@@ -302,7 +329,7 @@ function CaseReview({
           </button>
         )}
 
-        {feedback && <p role={feedback.ok ? "status" : "alert"} className={feedback.ok ? "text-sm text-green-300" : "text-sm text-red-300"}>{feedback.message}</p>}
+        {feedback && !feedback.legal && <p role={feedback.ok ? "status" : "alert"} className={feedback.ok ? "text-sm text-green-300" : "text-sm text-red-300"}>{feedback.message}</p>}
       </form>
     </section>
   );

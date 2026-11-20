@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { MongoServerError, ObjectId } from "mongodb";
 import {
-  amountOptions, communicationOptions, isPublicationCategory, isPublicationResolution,
+  amountOptions, communicationOptions, isLegalReviewStatus, isPublicationCategory, isPublicationResolution,
 } from "@/constants/cases";
 import { hasAdminSession, privateResponseHeaders, validAdminOrigin } from "@/lib/auth/admin";
 import { getDb } from "@/lib/db/mongodb";
@@ -104,6 +104,7 @@ export async function POST(req: Request) {
     if (companyId && !company) return failure("La inmobiliaria seleccionada ya no está disponible.");
 
     const receipt = { ok: true, id: caseId.toHexString(), message: "Reclamo recibido para revisión." };
+    const now = new Date();
     try {
       await cases.insertOne({
         _id: caseId,
@@ -114,7 +115,10 @@ export async function POST(req: Request) {
         acceptTerms: true,
         declaracionVeracidad: true,
         allowPublication: body.allowPublication === true,
-        createdAt: new Date(),
+        createdAt: now,
+        ...(body.legalEvaluation === true && {
+          legalReview: { status: "solicitada", requestedAt: now, updatedAt: now },
+        }),
         status: "pendiente",
         revision: 0,
       });
@@ -167,6 +171,7 @@ export async function GET() {
           allowPublication: 1,
           createdAt: 1,
           reviewedAt: 1,
+          legalReview: 1,
           status: { $ifNull: ["$status", "pendiente"] },
           revision: { $ifNull: ["$revision", 0] },
           "publication.category": 1,
@@ -192,7 +197,7 @@ export async function PATCH(req: Request) {
   const action = body?.action;
   const revision = body?.revision;
 
-  if (!ObjectId.isValid(id) || (action !== "publish" && action !== "withdraw") ||
+  if (!ObjectId.isValid(id) || (action !== "publish" && action !== "withdraw" && action !== "legal-review") ||
       typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 0) {
     return failure("La solicitud de revisión no es válida.");
   }
@@ -205,6 +210,18 @@ export async function PATCH(req: Request) {
       ? { $or: [{ revision: 0 }, { revision: { $exists: false } }] }
       : { revision };
     const filter = { _id, ...revisionFilter };
+    if (action === "legal-review") {
+      const status = body?.legalStatus;
+      if (!isLegalReviewStatus(status)) return failure("El estado de evaluación no es válido.");
+      const result = await cases.updateOne(
+        { ...filter, "legalReview.status": { $exists: true } },
+        { $set: { "legalReview.status": status, "legalReview.updatedAt": new Date() }, $inc: { revision: 1 } },
+      );
+      return result.matchedCount
+        ? response({ ok: true, legalStatus: status })
+        : failure("La solicitud de evaluación cambió o ya no está disponible.", 409);
+    }
+
     const current = await cases.findOne(
       { _id },
       { projection: { allowPublication: 1, inmobiliariaId: 1, publication: 1, status: 1 } },
