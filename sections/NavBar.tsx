@@ -6,13 +6,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlineMenuAlt3, HiOutlineX } from "react-icons/hi";
 import CaseSectionLink from "@/components/common/CaseSectionLink";
 import Image from "next/image";
+import HomeSectionLink from "@/components/common/HomeSectionLink";
 
 const navLinks = [
-  { label: "Inicio", href: "#hero" },
-  { label: "Casos", href: "#casos" },
-  { label: "Relatos", href: "#relatos" },
-  { label: "FAQ", href: "#faq" },
-  { label: "Contacto", href: "#footer" },
+  { label: "Inicio", href: "/#hero" },
+  { label: "Casos", href: "/#casos" },
+  { label: "Noticias", href: "/#noticias" },
+  { label: "FAQ", href: "/#faq" },
+  { label: "Contacto", href: "/#footer" },
 ] as const;
 
 export default function Navbar() {
@@ -99,13 +100,13 @@ export default function Navbar() {
 
             <nav className="hidden items-center gap-7 lg:flex">
               {navLinks.map((link) => (
-                <Link
+                <HomeSectionLink
                   key={link.href}
                   href={link.href}
                   className="text-sm font-medium text-[var(--color-text-secondary)] transition hover:text-[var(--color-text-primary)]"
                 >
                   {link.label}
-                </Link>
+                </HomeSectionLink>
               ))}
             </nav>
 
@@ -172,13 +173,13 @@ export default function Navbar() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.04 * index }}
                   >
-                    <Link
+                    <HomeSectionLink
                       href={link.href}
                       onClick={closeMenu}
                       className="flex rounded-xl border border-white/8 bg-white/[0.03] px-4 py-4 text-base font-semibold text-[var(--color-text-primary)] transition hover:border-white/15 hover:bg-white/[0.05]"
                     >
                       {link.label}
-                    </Link>
+                    </HomeSectionLink>
                   </motion.div>
                 ))}
               </div>

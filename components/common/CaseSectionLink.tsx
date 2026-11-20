@@ -1,3 +1,5 @@
+import HomeSectionLink from "@/components/common/HomeSectionLink";
+
 type Props = {
   label?: string;
   className?: string;
@@ -16,14 +18,12 @@ export default function CaseSectionLink({
     : "text-sm text-[var(--color-text-secondary)] transition-colors hover:text-white";
 
   return (
-    // A native anchor scrolls back to the form even when the URL already has this hash.
-    // eslint-disable-next-line @next/next/no-html-link-for-pages
-    <a
+    <HomeSectionLink
       href="/#registrar-reclamo"
       onClick={onClick}
       className={`${style} ${className}`}
     >
       {label}
-    </a>
+    </HomeSectionLink>
   );
 }

@@ -120,7 +120,7 @@ export default function ReportedCasesSection() {
     void loadPublished();
   }, []);
   return (
-    <section className="relative overflow-hidden bg-elevated py-14 md:py-20">
+    <section id="casos" className="relative scroll-mt-24 overflow-hidden bg-elevated py-14 md:py-20">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.04),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.02),transparent_35%)]" />
       <div className="relative mx-auto grid max-w-7xl gap-8 px-5 sm:px-6 lg:grid-cols-[1.6fr_1fr] lg:gap-10">
         {/* LEFT COLUMN */}
@@ -133,7 +133,7 @@ export default function ReportedCasesSection() {
         >
           {/* Companies */}
           <div className="rounded-[var(--radius-lg)] border border-white/8 bg-[var(--color-bg-surface)] p-5 shadow-[var(--shadow-medium)] md:p-7">
-            <h2 className="text-center text-lg font-extrabold text-red sm:text-xl md:text-2xl">
+            <h2 id="relatos" className="scroll-mt-24 text-center text-lg font-extrabold text-red sm:text-xl md:text-2xl">
               Reclamos publicados por usuarios
             </h2>
             <div className="mt-2 grid grid-cols-1 gap-4">

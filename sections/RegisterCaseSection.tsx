@@ -15,7 +15,7 @@ export default function RegisterCaseSection() {
       id="registrar-reclamo"
       tabIndex={-1}
       aria-labelledby="registrar-reclamo-title"
-      className="scroll-mt-24 focus:outline-none border-t border-white/8 bg-[#050505] px-5 py-14 text-white sm:px-8 sm:py-20"
+      className="scroll-mt-24 border-t border-white/8 bg-[#080808] bg-[radial-gradient(ellipse_at_20%_35%,#232428_0%,#111214_44%,#080808_78%)] px-5 py-14 text-white focus:outline-none sm:px-8 sm:py-20"
     >
       <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1fr_1fr] lg:gap-20">
         <div className="lg:pl-6">
@@ -31,13 +31,7 @@ export default function RegisterCaseSection() {
             className="mt-4 text-[clamp(2.5rem,5vw,4.5rem)] leading-[1.04] font-black tracking-tight uppercase"
           >
             Envíanos
-            <span className="relative mt-2 block w-fit isolate px-3 pr-5 pb-1 italic">
-              <span
-                aria-hidden="true"
-                className="absolute inset-x-0 inset-y-1 -z-10 -skew-x-12 rounded-l-[18%] bg-[#b51025] [clip-path:polygon(2%_12%,15%_7%,13%_3%,94%_0%,100%_16%,96%_25%,99%_35%,98%_74%,94%_90%,96%_96%,6%_100%,8%_93%,0%_86%,4%_70%,0%_56%)]"
-              />
-              tu caso
-            </span>
+            <span className="mt-1 block text-[#d2d3d7]">tu caso</span>
           </h2>
           <p className="mt-6 max-w-sm text-base leading-relaxed text-[#c7c7c9] sm:text-lg">
             Si tu inmobiliaria incumplió lo acordado, cuéntanos qué pasó y qué solución esperas.

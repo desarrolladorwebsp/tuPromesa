@@ -5,61 +5,46 @@ import { motion } from "framer-motion";
 
 const newsItems = [
   {
-    id: 1,
-    title: "Retraso por años en entrega de viviendas afectó a 268 compradores",
+    title: "Fallo por retrasos en la entrega de viviendas en Valdivia",
     image: "/images/news-01.webp",
-    category: "Noticias",
-    date: "25/01/2026",
-    excerpt:
-      "Cientos de familias en Valdivia enfrentaron años de retraso en la entrega de sus viviendas, lo que generó gastos adicionales e incertidumbre. La justicia ordenó indemnizaciones mensuales a los afectados.",
-
-    source: "El Desconcierto",
-    href: "https://eldesconcierto.cl/2026/01/25/retraso-por-anos-en-entrega-de-viviendas-afecto-a-268-compradores-inmobiliaria-debera-pagarles-350-mil-por-cada-mes-de-atraso",
+    date: "2026-01-29",
+    dateLabel: "29/01/2026",
+    excerpt: "Conadecus publicó el fallo de la Corte de Apelaciones sobre los retrasos que afectaron a 268 familias del proyecto Villa Galilea II.",
+    source: "Conadecus",
+    href: "https://www.conadecus.cl/logro-para-consumidores-demanda-colectiva-contra-inmobiliaria-galilea-consigue-fallo-lapidario-e-indemnizacion-para-vecinos-que-no-recibieron-sus-casas-a-tiempo/",
   },
   {
-    id: 2,
-    title: "Sernac obliga a inmobiliarias a cumplir fechas prometidas",
+    title: "SERNAC explica cuándo una fecha de entrega compromete a la inmobiliaria",
     image: "/images/news-02.jpeg",
-    category: "Noticias",
-    date: "25/01/2026",
-    excerpt:
-      "El Sernac estableció que todas las fechas prometidas, incluso antes de firmar contrato, son vinculantes y deben cumplirse por las inmobiliarias.",
-
-    source: "CNN Chile",
-    href: "https://www.cnnchile.com/servicios/que-pasa-si-la-inmobiliaria-no-entrega-a-tiempo-nuevo-dictamen-del-sernac-lo-aclara_20250501/",
+    date: "2025-04-30",
+    dateLabel: "30/04/2025",
+    excerpt: "El servicio publicó un dictamen sobre los plazos que las inmobiliarias informan antes de firmar una promesa de compraventa.",
+    source: "SERNAC",
+    href: "https://www.sernac.cl/portal/604/w3-article-84782.html",
   },
   {
-    id: 3,
-    title: "Corte de Santiago ordena cumplir promesa de compraventa",
+    title: "SERNAC abre un procedimiento colectivo con Inmobiliaria Armas",
     image: "/images/news-03.jpg",
-    category: "Noticias",
-    date: "25/01/2026",
-    excerpt:
-      "La justicia confirmó que una inmobiliaria debía cumplir lo prometido en contratos de compraventa tras una demanda de los afectados.",
-    source: "Poder Judicial de Chile",
-    href: "https://www.pjud.cl/prensa-y-comunicaciones/noticias-del-poder-judicial/135478",
-    summary:
-      "La justicia confirmó que una inmobiliaria debía cumplir lo prometido en contratos de compraventa tras una demanda de los afectados.",
-    impact_angle:
-      "Valida que las promesas inmobiliarias tienen peso legal real y pueden ser exigidas judicialmente.",
+    date: "2026-06-02",
+    dateLabel: "02/06/2026",
+    excerpt: "El procedimiento aborda posibles retrasos en devoluciones de dinero y falta de información en procesos de reserva y compraventa.",
+    source: "SERNAC",
+    href: "https://www.sernac.cl/portal/604/w3-article-88807.html",
   },
   {
-    id: 4,
-    title: "Sernac fija reglas: inmobiliarias deben respetar fechas de entrega",
+    title: "Promesa de compraventa: qué revisar si desistes de comprar",
     image: "/images/news-04.jpg",
-    category: "Noticias",
-    date: "25/01/2026",
-    excerpt:
-      "El organismo aclaró que no respetar plazos constituye incumplimiento contractual y habilita a los consumidores a exigir compensaciones.",
-    impact_angle:
-      "Conecta directamente con el problema de tu landing: incumplimientos que permiten reclamar, exigir devolución o indemnización.",
-    href: "https://www.sernac.cl/portal/618/w3-propertyvalue-105271.html",
+    date: "2024-10-17",
+    dateLabel: "17/10/2024",
+    excerpt: "SERNAC explica qué revisar en una reserva o promesa de compraventa frente a un desistimiento y describe cuándo presentar un reclamo.",
+    source: "SERNAC",
+    href: "https://www.sernac.cl/portal/604/w3-article-82955.html",
   },
 ] as const;
 
 export default function NewsSection() {
   return (
-    <section className="relative overflow-hidden bg-elevated  py-14 md:py-20">
+    <section id="noticias" aria-labelledby="noticias-title" className="relative scroll-mt-24 overflow-hidden bg-elevated py-14 md:py-20">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.05),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(215,38,46,0.08),transparent_24%)]" />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
@@ -75,7 +60,7 @@ export default function NewsSection() {
               Noticias y actualidad
             </span>
 
-            <h2 className="mt-4 text-3xl font-extrabold leading-tight text-gray-light sm:text-4xl md:text-5xl">
+            <h2 id="noticias-title" className="mt-4 text-3xl font-extrabold leading-tight text-gray-light sm:text-4xl md:text-5xl">
               Información útil para entender mejor el problema
             </h2>
 
@@ -87,120 +72,35 @@ export default function NewsSection() {
           </div>
         </motion.div>
 
-        {/* Desktop / Tablet grid */}
-        <div className="mt-10 hidden gap-6 md:grid md:grid-cols-2 xl:grid-cols-4">
-          {newsItems.map((item, index) => (
-            <motion.article
-              key={item.id}
-              initial={{ opacity: 0, y: 22 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.38, delay: index * 0.06 }}
-              className="group overflow-hidden rounded-xl border border-white/10 bg-light shadow-[var(--shadow-medium)]"
+        <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 md:mt-10 md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:pb-0 xl:grid-cols-4">
+          {newsItems.map((item) => (
+            <article
+              key={item.href}
+              className="group w-[86%] shrink-0 snap-start overflow-hidden rounded-xl border border-white/10 bg-surface shadow-[var(--shadow-medium)] md:w-auto"
             >
-              <a href={item.href} className="block h-full" target="_blank">
+              <a href={item.href} className="block h-full focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white" target="_blank" rel="noopener noreferrer">
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <Image
                     fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                    sizes="(max-width: 767px) 86vw, (max-width: 1279px) 50vw, 25vw"
                     src={item.image}
-                    alt={item.title}
+                    alt=""
                     className="object-cover transition duration-500 group-hover:scale-[1.04]"
                   />
-                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08),rgba(0,0,0,0.35))]" />
-
-                  <div className="absolute left-4 top-4">
-                    <span className="inline-flex rounded-full bg-[var(--color-primary)] px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
-                      {item.category}
-                    </span>
-                  </div>
                 </div>
-
                 <div className="p-5">
-                  <p className="text-xs font-medium uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
-                    {item.date}
+                  <p className="text-xs font-medium text-[#b8b8bd]">
+                    {item.source} · <time dateTime={item.date}>{item.dateLabel}</time>
                   </p>
-
-                  <h3 className="mt-3 text-xl font-extrabold leading-snug text-dark transition group-hover:text-white">
-                    {item.title}
-                  </h3>
-
-                  <p className="mt-3 text-sm leading-relaxed text-secondary">
-                    {item.excerpt}
-                  </p>
-
-                  <div className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-red hover:scale-105 cursor-pointer">
-                    Leer más
-                    <span aria-hidden="true">→</span>
-                  </div>
+                  <h3 className="mt-3 text-lg font-extrabold leading-snug text-white">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-white-secondary">{item.excerpt}</p>
+                  <span className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-[#ff747b]">
+                    Leer en la fuente <span aria-hidden="true">→</span>
+                  </span>
                 </div>
               </a>
-            </motion.article>
+            </article>
           ))}
-        </div>
-
-        {/* Mobile carousel-like scroll */}
-        <div className="mt-8 md:hidden">
-          <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {newsItems.map((item, index) => (
-              <motion.article
-                key={item.id}
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.35, delay: index * 0.05 }}
-                className="w-[86%] min-w-[86%] snap-center overflow-hidden rounded-[var(--radius-xl)] border border-white/10 bg-[var(--color-bg-surface)] shadow-[var(--shadow-medium)]"
-              >
-                <a href={item.href} className="block" target="_blank">
-                  <div className="relative aspect-[16/10] overflow-hidden">
-                    <Image
-                      fill
-                      sizes="86vw"
-                      src={item.image}
-                      alt={item.title}
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08),rgba(0,0,0,0.38))]" />
-
-                    <div className="absolute left-4 top-4">
-                      <span className="inline-flex rounded-full bg-[var(--color-primary)] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">
-                        {item.category}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-5">
-                    <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
-                      {item.date}
-                    </p>
-
-                    <h3 className="mt-3 text-xl font-extrabold leading-snug text-[var(--color-text-primary)]">
-                      {item.title}
-                    </h3>
-
-                    <p className="mt-3 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                      {item.excerpt}
-                    </p>
-
-                    <div className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-[var(--color-primary)]">
-                      Leer más
-                      <span aria-hidden="true">→</span>
-                    </div>
-                  </div>
-                </a>
-              </motion.article>
-            ))}
-          </div>
-
-          <div className="mt-3 flex justify-center gap-2">
-            {newsItems.map((item) => (
-              <span
-                key={item.id}
-                className="h-2 w-2 rounded-full bg-white/20"
-                aria-hidden="true"
-              />
-            ))}
-          </div>
         </div>
       </div>
     </section>

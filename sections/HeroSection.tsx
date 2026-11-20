@@ -1,6 +1,6 @@
 "use client";
 
-import ImpactStatsSection from "@/sections/ImpactStatusSection";
+import HomeSectionLink from "@/components/common/HomeSectionLink";
 import CaseSectionLink from "@/components/common/CaseSectionLink";
 import Image from "next/image";
 
@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 
 export default function HeroSection() {
   return (
-    <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden">
+    <section id="hero" className="relative w-full min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
@@ -64,20 +64,11 @@ export default function HeroSection() {
         >
           <CaseSectionLink />
 
-          <button className="px-6 py-3 cursor-pointer rounded-[var(--radius-md)] font-semibold border border-white/30 text-white backdrop-blur-sm bg-white/10 hover:bg-white/20 hover:border-white/50 transition-all duration-200">
+          <HomeSectionLink href="/#casos" className="px-6 py-3 cursor-pointer rounded-[var(--radius-md)] font-semibold border border-white/30 text-white backdrop-blur-sm bg-white/10 hover:bg-white/20 hover:border-white/50 transition-all duration-200">
             Ver denuncias reales →
-          </button>
+          </HomeSectionLink>
         </motion.div>
 
-        {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
-          className="mt-6 w-full"
-        >
-          <ImpactStatsSection />
-        </motion.div>
       </div>
     </section>
   );

@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { siteConfig } from "@/site";
 import CaseSectionLink from "@/components/common/CaseSectionLink";
+import HomeSectionLink from "@/components/common/HomeSectionLink";
 
 type EconomicIndicators = {
   uf: number | null;
@@ -13,9 +14,8 @@ type EconomicIndicators = {
 };
 
 const footerLinks = [
-  { label: "Ver denuncias", href: "#" },
-  { label: "FAQ", href: "#" },
-  { label: "Contacto", href: "#" },
+  { label: "Ver denuncias", href: "/#relatos" },
+  { label: "FAQ", href: "/#faq" },
 ] as const;
 
 export default function Footer() {
@@ -85,16 +85,16 @@ export default function Footer() {
 
   // Extraemos datos de contacto y redes sociales (ajusta según tu siteConfig)
   const socialLinks = {
-    whatsapp: siteConfig?.contact?.whatsappLink || "#",
-    instagram: siteConfig?.social?.instagram || "#",
-    facebook: siteConfig?.social?.facebook || "#",
-    email: siteConfig?.contact?.email || "contacto@tupromesa.cl",
+    whatsapp: siteConfig.contact.whatsappLink,
+    instagram: siteConfig.social.instagram,
+    facebook: siteConfig.social.facebook,
+    email: siteConfig.contact.email,
   };
 
   return (
     <footer
       id="footer"
-      className="relative overflow-hidden border-t border-white/8 bg-[var(--color-bg-base)]"
+      className="relative scroll-mt-24 overflow-hidden border-t border-white/8 bg-[var(--color-bg-base)]"
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(255,255,255,0.03),transparent_60%)]" />
 
@@ -195,14 +195,17 @@ export default function Footer() {
             </h4>
             <CaseSectionLink variant="text" />
             {footerLinks.map((link) => (
-              <Link
+              <HomeSectionLink
                 key={link.label}
                 href={link.href}
                 className="text-sm text-[var(--color-text-secondary)] transition-colors duration-200 hover:text-white"
               >
                 {link.label}
-              </Link>
+              </HomeSectionLink>
             ))}
+            <a href={`mailto:${siteConfig.contact.email}`} className="text-sm text-white-secondary transition-colors hover:text-white">
+              Contacto
+            </a>
           </motion.div>
 
           {/* 3. Contacto */}
@@ -312,11 +315,12 @@ export default function Footer() {
               className="flex items-center transition-transform duration-200 hover:scale-105"
             >
               <Image
-                src="/images/logo-smartpro.png"
+                src="/images/logo-smartpro-white-letters.webp"
                 alt="SmartPro — Desarrollo web profesional"
-                width={80}
-                height={30}
-                className="w-auto rounded-[var(--radius-sm)] bg-white object-contain px-3 py-1.5"
+                width={256}
+                height={85}
+                sizes="128px"
+                className="h-auto w-32 object-contain"
               />
             </a>
           </div>

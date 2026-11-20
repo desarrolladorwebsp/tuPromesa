@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { siteConfig } from "@/site";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -9,46 +10,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://tupromesa.cl"),
+  metadataBase: new URL(siteConfig.url),
   title: {
-    default: "TuPromesa.cl — Denuncia Incumplimientos Inmobiliarios",
+    default: "Reclamos inmobiliarios en Chile | TuPromesa.cl",
     template: "%s | TuPromesa.cl",
-  },
-  description:
-    "Visibiliza y denuncia incumplimientos inmobiliarios en Chile. Retrasos en entrega, cambios de condiciones o problemas con tu promesa de compraventa.",
-  keywords: [
-    "incumplimiento inmobiliario Chile",
-    "retraso entrega vivienda Chile",
-    "promesa compraventa problemas",
-    "inmobiliarias problemas Chile",
-    "denunciar inmobiliaria Chile",
-  ],
-  alternates: {
-    canonical: "https://tupromesa.cl",
-  },
-  openGraph: {
-    type: "website",
-    locale: "es_CL",
-    url: "https://tupromesa.cl",
-    siteName: "TuPromesa.cl",
-    title: "¿Tu promesa inmobiliaria no se cumplió? - TuPromesa.cl",
-    description:
-      "Visibiliza y denuncia incumplimientos inmobiliarios en Chile. Retrasos en entrega, o problemas con tu promesa de compraventa. Registra tu caso ahora.",
-    images: [
-      {
-        url: "/images/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "¿Tu promesa inmobiliaria no se cumplió?",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "¿Tu promesa inmobiliaria no se cumplió? - TuPromesa.cl",
-    description:
-      "Visibiliza y denuncia incumplimientos inmobiliarios en Chile. Retrasos en entrega, o problemas con tu promesa de compraventa.",
-    images: ["/images/og-image.png"],
   },
 };
 
@@ -58,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${inter.variable} h-full antialiased`}>
+    <html lang="es-CL" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-[var(--font-inter)]">
         {children}
       </body>
