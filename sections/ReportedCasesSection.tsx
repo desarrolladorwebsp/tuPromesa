@@ -133,22 +133,29 @@ export default function ReportedCasesSection() {
         >
           {/* Companies */}
           <div className="rounded-[var(--radius-lg)] border border-white/8 bg-[var(--color-bg-surface)] p-5 shadow-[var(--shadow-medium)] md:p-7">
+            {publishedCases.length > 0 && (
+              <section aria-labelledby="fichas-tupromesa" className="mb-8">
+                <h2 id="fichas-tupromesa" className="text-lg font-extrabold text-red sm:text-xl">Fichas publicadas en TuPromesa</h2>
+                <div className="mt-3 grid gap-4">
+                  {publishedCases.map((item) => (
+                    <article key={item.id} className="rounded-md border border-default bg-light p-4 text-dark">
+                      <h3 className="font-semibold text-red">{item.companyName}</h3>
+                      <p className="mt-1 text-xs text-dark/75">
+                        Ficha anónima · <time dateTime={item.month}>{item.month}</time>
+                      </p>
+                      <h4 className="mt-2 text-sm font-bold">{item.title}</h4>
+                      <p className="mt-1 text-sm leading-relaxed">
+                        {item.summary} {item.requestedResolution}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            )}
             <h2 id="relatos" className="scroll-mt-24 text-center text-lg font-extrabold text-red sm:text-xl md:text-2xl">
-              Reclamos publicados por usuarios
+              Relatos publicados en Reclamos.cl
             </h2>
-            <div className="mt-2 grid grid-cols-1 gap-4">
-              {publishedCases.map((item) => (
-                <article key={item.id} className="rounded-md border border-default bg-light p-4 text-dark">
-                  <h3 className="font-semibold text-red">{item.companyName}</h3>
-                  <p className="mt-1 text-xs text-dark/75">
-                    Ficha anónima · <time dateTime={item.month}>{item.month}</time>
-                  </p>
-                  <h4 className="mt-2 text-sm font-bold">{item.title}</h4>
-                  <p className="mt-1 text-sm leading-relaxed">
-                    {item.summary} {item.requestedResolution}
-                  </p>
-                </article>
-              ))}
+            <div className="mt-3 grid gap-4">
               {cases.map((caseItem) => (
                 <FeaturedCase
                   key={caseItem.sourceUrl}

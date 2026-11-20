@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import FormNewInmobiliaria from "@/components/admin/FormNewInmobiliaria";
 import InmobiliariasList from "@/components/admin/InmobiliariasList";
 import CasesList from "@/components/admin/CasesList";
+import VoteSummary from "@/components/admin/VoteSummary";
 
 type CompanyFields = {
   name: string;
@@ -90,6 +91,7 @@ export default function AdminPage() {
 
         {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
         <CasesList companies={companies} />
+        <VoteSummary />
 
         <section className="mt-8 grid gap-6 xl:grid-cols-[420px_1fr]">
           <div>
