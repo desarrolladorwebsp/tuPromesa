@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { siteConfig } from "@/site";
+import CaseSectionLink from "@/components/common/CaseSectionLink";
 
 type EconomicIndicators = {
   uf: number | null;
@@ -192,12 +193,7 @@ export default function Footer() {
             <h4 className="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-muted)]">
               Navegación
             </h4>
-            <a
-              href="/#registrar-reclamo"
-              className="text-sm text-[var(--color-text-secondary)] transition-colors hover:text-white"
-            >
-              Denunciar mi caso
-            </a>
+            <CaseSectionLink variant="text" />
             {footerLinks.map((link) => (
               <Link
                 key={link.label}
