@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import Link from "next/link";
+import { ArrowRight, IdCard, Mail, MessageSquare, Phone, UserRound } from "lucide-react";
 import { amountOptions, communicationOptions } from "@/constants/cases";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -38,14 +39,10 @@ type Inmobiliaria = {
   name: string;
 };
 
-type RegisterCaseFormProps = {
-  onSubmitSuccess?: (data: CaseFormData) => void;
-};
-
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 const STEP_LABELS = [
-  "Datos personales",
+  "Tu historia",
   "Inmobiliaria",
   "Detalle del reclamo",
   "Confirmación",
@@ -72,9 +69,7 @@ const initialForm: CaseFormData = {
 
 // ─── Main Component ─────────────────────────────────────────────────────────
 
-export default function RegisterCaseForm({
-  onSubmitSuccess,
-}: RegisterCaseFormProps) {
+export default function RegisterCaseForm() {
   const [form, setForm] = useState<CaseFormData>(initialForm);
   const [errors, setErrors] = useState<
     Partial<Record<keyof CaseFormData | string, string>>
@@ -83,8 +78,17 @@ export default function RegisterCaseForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [receipt, setReceipt] = useState("");
+  const stepHeading = useRef<HTMLHeadingElement>(null);
+  const previousStep = useRef(0);
   const submitting = useRef(false);
   const submissionKey = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (previousStep.current !== step) {
+      previousStep.current = step;
+      stepHeading.current?.focus();
+    }
+  }, [step]);
 
   // Inmobiliarias state
   const [inmobiliarias, setInmobiliarias] = useState<Inmobiliaria[]>([]);
@@ -141,6 +145,18 @@ export default function RegisterCaseForm({
       else if (!/\S+@\S+\.\S+/.test(form.email))
         nextErrors.email = "Correo no válido.";
       if (!form.phone.trim()) nextErrors.phone = "Ingresa tu teléfono.";
+      else if (!/^\+?[\d ()-]+$/.test(form.phone.trim()) ||
+          !/^\d{7,15}$/.test(form.phone.replace(/\D/g, ""))) {
+        nextErrors.phone = "Ingresa un teléfono válido.";
+      }
+      if (form.rut.trim() && !/^[\d.]+-?[\dkK]$/.test(form.rut.trim())) {
+        nextErrors.rut = "Revisa el formato del RUT.";
+      }
+      if (!form.issueDescription.trim()) {
+        nextErrors.issueDescription = "Describe brevemente qué ocurrió.";
+      } else if (form.issueDescription.trim().length < 30) {
+        nextErrors.issueDescription = "Describe lo ocurrido en al menos 30 caracteres.";
+      }
     }
 
     if (s === 1) {
@@ -159,12 +175,6 @@ export default function RegisterCaseForm({
         nextErrors.incidentDate = "Ingresa la fecha de los hechos.";
       if (!form.claimedAmount.trim())
         nextErrors.claimedAmount = "Selecciona un rango de precio.";
-      if (!form.issueDescription.trim()) {
-        nextErrors.issueDescription = "Describe cuál es el problema.";
-      } else if (form.issueDescription.trim().length < 30) {
-        nextErrors.issueDescription =
-          "Por favor, detalla un poco más el problema (mín. 30 caracteres).";
-      }
       if (!form.expectedSolution.trim())
         nextErrors.expectedSolution = "Indica qué debe hacer la empresa.";
       if (!form.priorCommunication.trim())
@@ -263,21 +273,18 @@ export default function RegisterCaseForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="relative z-10 w-full space-y-6 p-1 z-[100]"
+      className="min-w-0 w-full space-y-5 rounded-2xl border border-[#79212c] bg-[radial-gradient(ellipse_at_top_left,#231216_0%,#101010_58%)] p-5 text-white [color-scheme:dark] sm:p-8"
     >
       {/* Ocultamos el Header y el Stepper si estamos en la vista de éxito (step === 4) */}
       {step < 4 && (
         <>
-          {/* Header */}
-          <div>
-            <h2 className="text-2xl font-extrabold text-dark">
-              Registrar mi reclamo
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-dark">
-              Completa este formulario detallando tu situación para gestionar el
-              incumplimiento.
-            </p>
-          </div>
+          <h3
+            ref={stepHeading}
+            tabIndex={-1}
+            className="mb-4 scroll-mt-28 text-lg font-extrabold tracking-wide uppercase focus:outline-none sm:text-xl"
+          >
+            {step === 0 ? <>Cuéntanos <span className="text-[#ff5a61]">tu historia</span></> : STEP_LABELS[step]}
+          </h3>
 
           {/* Stepper */}
           <Stepper
@@ -290,10 +297,12 @@ export default function RegisterCaseForm({
 
       {/* ─── STEP 0 : Datos Personales ───────────────────────────────── */}
       {step === 0 && (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-x-3 gap-y-3.5 sm:grid-cols-2">
           <Field>
             <Label htmlFor="firstName">Nombre *</Label>
             <Input
+              icon={UserRound}
+              autoComplete="given-name"
               id="firstName"
               name="firstName"
               maxLength={100}
@@ -307,6 +316,8 @@ export default function RegisterCaseForm({
           <Field>
             <Label htmlFor="lastName">Apellido *</Label>
             <Input
+              icon={UserRound}
+              autoComplete="family-name"
               id="lastName"
               name="lastName"
               maxLength={100}
@@ -317,22 +328,11 @@ export default function RegisterCaseForm({
             <ErrorText message={errors.lastName} />
           </Field>
 
-          <Field>
-            <Label htmlFor="rut">RUT *</Label>
-            <Input
-              id="rut"
-              name="rut"
-              maxLength={20}
-              value={form.rut}
-              onChange={handleChange}
-              placeholder="12.345.678-9"
-            />
-            <ErrorText message={errors.rut} />
-          </Field>
-
-          <Field>
+          <Field className="sm:col-span-2">
             <Label htmlFor="email">Correo electrónico *</Label>
             <Input
+              icon={Mail}
+              autoComplete="email"
               id="email"
               name="email"
               maxLength={254}
@@ -344,9 +344,25 @@ export default function RegisterCaseForm({
             <ErrorText message={errors.email} />
           </Field>
 
-          <Field className="md:col-span-2">
+          <Field>
+            <Label htmlFor="rut">RUT *</Label>
+            <Input
+              icon={IdCard}
+              id="rut"
+              name="rut"
+              maxLength={20}
+              value={form.rut}
+              onChange={handleChange}
+              placeholder="12.345.678-9"
+            />
+            <ErrorText message={errors.rut} />
+          </Field>
+
+          <Field>
             <Label htmlFor="phone">Teléfono *</Label>
             <Input
+              icon={Phone}
+              type="tel" autoComplete="tel"
               id="phone"
               name="phone"
               maxLength={25}
@@ -355,6 +371,20 @@ export default function RegisterCaseForm({
               placeholder="+56 9 1234 5678"
             />
             <ErrorText message={errors.phone} />
+          </Field>
+          <Field className="sm:col-span-2">
+            <Label htmlFor="issueDescription">Cuéntanos brevemente tu caso *</Label>
+            <Textarea
+              icon={MessageSquare}
+              rows={3}
+              id="issueDescription"
+              name="issueDescription"
+              maxLength={5000}
+              value={form.issueDescription}
+              onChange={handleChange}
+              placeholder="Cuéntanos qué ocurrió"
+            />
+            <ErrorText message={errors.issueDescription} />
           </Field>
         </div>
       )}
@@ -373,7 +403,7 @@ export default function RegisterCaseForm({
                 maxLength={120}
                 placeholder="Nombre comercial"
               />
-              <p className="mt-1 text-xs text-dark">
+              <p className="mt-1 text-xs text-[#e4e4e7]">
                 El equipo revisará esta sugerencia junto con tu reclamo.
               </p>
             </Field>
@@ -404,13 +434,13 @@ export default function RegisterCaseForm({
               setShowNewInmobiliaria((prev) => !prev);
               setErrors((prev) => ({ ...prev, inmobiliariaId: "" }));
             }}
-            className="text-sm font-semibold text-red underline-offset-2 hover:underline"
+            className="text-sm font-semibold text-[#ff777e] underline-offset-2 hover:underline"
           >
             {showNewInmobiliaria ? "Volver al catálogo" : "¿No encuentras tu inmobiliaria? Indica su nombre"}
           </button>
 
           {/* Checkbox veracidad */}
-          <div className="space-y-3 rounded-[var(--radius-md)] border border-[#01c676]/20 bg-white p-5">
+          <div className="space-y-3 rounded-[var(--radius-md)] border border-white/12 bg-[#181818] p-5">
             <CheckboxRow>
               <input
                 id="declaracionVeracidad"
@@ -418,7 +448,7 @@ export default function RegisterCaseForm({
                 type="checkbox"
                 checked={form.declaracionVeracidad}
                 onChange={handleChange}
-                className="mt-1 h-5 w-5 shrink-0 rounded-full accent-[#01c676] cursor-pointer text-red"
+                className="mt-1 h-5 w-5 shrink-0 rounded-full accent-[#d7262e] cursor-pointer text-red"
               />
               <div>
                 <Label
@@ -468,20 +498,7 @@ export default function RegisterCaseForm({
             <ErrorText message={errors.claimedAmount} />
           </Field>
 
-          <Field className="md:col-span-2">
-            <Label htmlFor="issueDescription">¿Cuál es el problema? *</Label>
-            <Textarea
-              id="issueDescription"
-              name="issueDescription"
-              maxLength={5000}
-              value={form.issueDescription}
-              onChange={handleChange}
-              placeholder="Describe detalladamente el incumplimiento o problema..."
-            />
-            <ErrorText message={errors.issueDescription} />
-          </Field>
-
-          <Field className="md:col-span-2">
+          <Field className="sm:col-span-2">
             <Label htmlFor="expectedSolution">
               ¿Qué debe hacer la empresa para solucionarlo? *
             </Label>
@@ -517,7 +534,7 @@ export default function RegisterCaseForm({
             <ErrorText message={errors.priorCommunication} />
           </Field>
 
-          <Field className="md:col-span-2">
+          <Field className="sm:col-span-2">
             <Label htmlFor="claimObjective">
               ¿Qué objetivo espera lograr con su reclamo? *
             </Label>
@@ -539,7 +556,7 @@ export default function RegisterCaseForm({
       {step === 3 && (
         <div className="space-y-5">
           {/* Resumen */}
-          <div className="space-y-4 rounded-[var(--radius-md)] border border-white/10 bg-[#021f41]/40 p-5">
+          <div className="space-y-4 rounded-[var(--radius-md)] border border-white/10 bg-[#181818] p-5">
             <h3 className="text-base font-bold text-[var(--color-text-primary)]">
               Resumen de tu reclamo
             </h3>
@@ -583,8 +600,8 @@ export default function RegisterCaseForm({
             </SummarySection>
           </div>
 
-          <div className="space-y-3 rounded-[var(--radius-md)] border border-white/10 bg-white p-5">
-            <label className="flex items-start gap-3 text-sm text-dark">
+          <div className="space-y-3 rounded-[var(--radius-md)] border border-white/10 bg-[#181818] p-5">
+            <label className="flex items-start gap-3 text-sm text-[#e4e4e7]">
               <input
                 id="acceptTerms"
                 name="acceptTerms"
@@ -596,13 +613,13 @@ export default function RegisterCaseForm({
               <span>
                 Autorizo que TuPromesa.cl guarde mis datos para revisar este reclamo y
                 contactarme según su{" "}
-                <Link href="/politica-privacidad" className="underline underline-offset-2">
+                <Link href="/politica-privacidad" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
                   política de privacidad
                 </Link>. *
               </span>
             </label>
             <ErrorText message={errors.acceptTerms} />
-            <label className="flex items-start gap-3 text-sm text-dark">
+            <label className="flex items-start gap-3 text-sm text-[#e4e4e7]">
               <input
                 name="allowPublication"
                 type="checkbox"
@@ -615,7 +632,7 @@ export default function RegisterCaseForm({
           </div>
 
           {submitError && (
-            <p role="alert" className="text-sm font-medium text-red-700">{submitError}</p>
+            <p role="alert" className="text-sm font-medium text-[#ff858a]">{submitError}</p>
           )}
         </div>
       )}
@@ -638,66 +655,47 @@ export default function RegisterCaseForm({
               />
             </svg>
           </div>
-          <h2 className="text-2xl font-extrabold text-dark">
-            ¡Reclamo enviado exitosamente!
-          </h2>
-          <p className="text-sm leading-relaxed text-dark max-w-md mx-auto">
+          <h3 ref={stepHeading} tabIndex={-1} className="scroll-mt-28 text-2xl font-extrabold text-white focus:outline-none">
+            Reclamo enviado
+          </h3>
+          <p className="text-sm leading-relaxed text-[#e4e4e7] max-w-md mx-auto">
             Tu caso quedó pendiente de revisión. Guarda este folio para identificarlo.
           </p>
 
-          <p className="break-all text-sm font-bold text-dark">Folio {receipt}</p>
+          <p className="break-all text-sm font-bold text-[#e4e4e7]">Folio {receipt}</p>
 
-          <div className="pt-6">
-            <button
-              type="button"
-              onClick={() => onSubmitSuccess?.(form)}
-              className="inline-flex items-center justify-center rounded-md bg-red px-8 py-3 text-sm font-extrabold uppercase tracking-wide text-white shadow-[0_4px_14px_0_rgba(215,38,46,0.39)] transition hover:bg-red-hover cursor-pointer"
-            >
-              Entendido
-            </button>
-          </div>
         </div>
       )}
 
       {/* ─── Navigation buttons ──────────────────────────────────────── */}
       {/* Ocultamos los botones de navegación en el paso de éxito */}
       {step < 4 && (
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs leading-relaxed text-[var(--color-text-muted)]">
-            {step < 3
-              ? "Los campos marcados con * son obligatorios."
-              : "Revisa toda la información antes de enviar."}
-          </p>
-
-          <div className="flex gap-3">
+        <div className="space-y-3">
+          <div className="flex gap-2">
             {step > 0 && (
               <button
                 type="button"
                 onClick={handleBack}
-                className="inline-flex items-center justify-center rounded-[var(--radius-md)] border border-white/10 bg-transparent px-6 py-3 text-sm font-bold uppercase tracking-wide text-[var(--color-text-secondary)] transition hover:bg-white/5 cursor-pointer"
+                disabled={isSubmitting}
+                className="rounded-lg border border-white/15 px-4 py-3 text-sm font-semibold text-white hover:bg-white/8 disabled:opacity-50"
               >
                 Atrás
               </button>
             )}
-
             {step < 3 ? (
-              <button
-                type="button"
-                onClick={handleNext}
-                className="inline-flex items-center justify-center rounded-md bg-red px-8 py-3 text-sm font-extrabold uppercase tracking-wide text-white shadow-[0_4px_14px_0_rgba(215,38,46,0.39)] transition hover:bg-red-hover cursor-pointer"
-              >
-                Siguiente
+              <button type="button" onClick={handleNext} className={primaryButtonStyle}>
+                Continuar <ArrowRight size={17} aria-hidden="true" />
               </button>
             ) : (
-              <button
-                type="submit"
-                disabled={!form.acceptTerms || isSubmitting}
-                className="inline-flex items-center justify-center rounded-md bg-red px-8 py-3 text-sm font-extrabold uppercase tracking-wide text-white shadow-[0_4px_14px_0_rgba(215,38,46,0.39)] transition hover:bg-red-hover disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isSubmitting ? "Enviando..." : "Enviar reclamo"}
+              <button type="submit" disabled={!form.acceptTerms || isSubmitting} className={primaryButtonStyle}>
+                {isSubmitting ? "Enviando…" : "Enviar mi caso"}
+                <ArrowRight size={17} aria-hidden="true" />
               </button>
             )}
           </div>
+          <p className="text-center text-xs leading-relaxed text-[#bfbfc2]">
+            {step === 3 ? "Revisa toda la información antes de enviar." : "Tu información será tratada con confidencialidad."}
+          </p>
         </div>
       )}
     </form>
@@ -714,78 +712,20 @@ type StepperProps = {
 
 function Stepper({ currentStep, labels, onStepClick }: StepperProps) {
   return (
-    <div className="flex items-center gap-1">
-      {labels.map((label, index) => {
-        const isActive = index === currentStep;
-        const isCompleted = index < currentStep;
-
-        return (
-          <div
-            key={label}
-            className="flex items-center flex-1 last:flex-initial"
-          >
-            {/* Step circle + label */}
-            <button
-              type="button"
-              onClick={() => onStepClick(index)}
-              className={`flex flex-col items-center gap-1.5 transition cursor-pointer group min-w-[60px] ${
-                isActive || isCompleted ? "" : "opacity-40"
-              }`}
-            >
-              <span
-                className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all ${
-                  isActive
-                    ? "bg-red text-white shadow-red"
-                    : isCompleted
-                      ? "bg-dark/20 t ext-dark border border-dark/40"
-                      : "border border-dark text-dark"
-                }`}
-              >
-                {isCompleted ? (
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={3}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                ) : (
-                  index + 1
-                )}
-              </span>
-              <span
-                className={`text-[10px] font-semibold leading-tight text-center hidden sm:block ${
-                  isActive
-                    ? "text-dark font-bold"
-                    : isCompleted
-                      ? "text-dark" // avanzado
-                      : "text-gray-light" // pendiente
-                }`}
-              >
-                {label}
-              </span>
-            </button>
-
-            {/* Connector line */}
-            {index < labels.length - 1 && (
-              <div className="flex-1 mx-2">
-                <div
-                  className={`h-[2px] w-full rounded-full transition-all ${
-                    index < currentStep ? "bg-red" : "bg-gray-light"
-                  }`}
-                />
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
+    <nav aria-label="Pasos del reclamo" className="mb-4 grid grid-cols-4 gap-1.5">
+      {labels.map((label, index) => (
+        <button
+          key={label}
+          type="button"
+          onClick={() => onStepClick(index)}
+          disabled={index >= currentStep}
+          aria-current={index === currentStep ? "step" : undefined}
+          className={`border-b-2 pb-1.5 text-left text-[10px] leading-tight font-semibold sm:text-[11px] ${index === currentStep ? "border-[#e72d41] text-white" : "border-white/15 text-[#afafb2] enabled:hover:text-white"}`}
+        >
+          {label}
+        </button>
+      ))}
+    </nav>
   );
 }
 
@@ -800,7 +740,7 @@ function SummarySection({
 }) {
   return (
     <div className="space-y-2">
-      <p className="text-xs font-bold uppercase tracking-wider text-dark">
+      <p className="text-xs font-bold uppercase tracking-wider text-[#e4e4e7]">
         {title}
       </p>
       <div className="space-y-1.5">{children}</div>
@@ -811,10 +751,10 @@ function SummarySection({
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col sm:flex-row sm:gap-2">
-      <span className="text-sm font-semibold text-dark sm:w-40 shrink-0 text-start">
+      <span className="text-sm font-semibold text-[#e4e4e7] sm:w-40 shrink-0 text-start">
         {label}:
       </span>
-      <span className="text-sm text-dark break-words">{value || "—"} </span>
+      <span className="min-w-0 text-sm text-[#e4e4e7] [overflow-wrap:anywhere]">{value || "—"} </span>
     </div>
   );
 }
@@ -840,47 +780,42 @@ function Label({ children, htmlFor, className = "" }: LabelProps) {
   return (
     <label
       htmlFor={htmlFor}
-      className={`mb-2 block text-sm font-semibold text-dark ${className}`}
+      className={`mb-1.5 block text-[13px] font-medium text-[#e4e4e7] ${className}`}
     >
       {children}
     </label>
   );
 }
 
-function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
+const controlStyle = "min-w-0 w-full rounded-lg border border-[#373737] bg-[#181818] px-3 py-3 text-base text-white outline-none transition placeholder:text-[#a4a4a8] focus:border-[#ff5a61] focus:ring-1 focus:ring-[#ff5a61] sm:text-sm";
+const primaryButtonStyle = "flex min-h-12 flex-1 items-center justify-center gap-3 rounded-lg bg-[#c8102e] px-4 py-3 text-sm font-extrabold tracking-wide text-white uppercase transition hover:bg-[#a70c26] disabled:cursor-not-allowed disabled:opacity-50";
+
+function Input({ icon: Icon, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { icon?: typeof Mail }) {
   return (
-    <input
-      {...props}
-      className="w-full rounded-sm border border-white/10 bg-white px-4 py-3 text-sm text-dark outline-none transition placeholder:text-gray-light focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-    />
+    <div className="relative">
+      {Icon && <Icon aria-hidden="true" size={16} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[#a4a4a8]" />}
+      <input {...props} className={`${controlStyle} ${Icon ? "pl-9" : ""}`} />
+    </div>
   );
 }
 
 function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
-  return (
-    <select
-      {...props}
-      className="w-full rounded-sm border border-white/10 bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-red"
-    >
-      {props.children}
-    </select>
-  );
+  return <select {...props} className={controlStyle} />;
 }
 
-function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+function Textarea({ icon: Icon, ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { icon?: typeof Mail }) {
   return (
-    <textarea
-      {...props}
-      rows={props.rows || 6}
-      className="w-full resize-none rounded-sm border border-white/10 bg-white px-4 py-3 text-sm text-dark outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-[#01c676] focus:ring-2 focus:ring-[#01c676]/20"
-    />
+    <div className="relative">
+      {Icon && <Icon aria-hidden="true" size={16} className="pointer-events-none absolute top-3.5 left-3 text-[#a4a4a8]" />}
+      <textarea rows={3} {...props} className={`${controlStyle} block resize-y ${Icon ? "pl-9" : ""}`} />
+    </div>
   );
 }
 
 function ErrorText({ message }: { message?: string }) {
   if (!message) return null;
 
-  return <p className="mt-2 text-xs font-medium text-red">{message}</p>;
+  return <p className="mt-2 text-xs font-medium text-[#ff858a]">{message}</p>;
 }
 
 function CheckboxRow({ children }: { children: React.ReactNode }) {

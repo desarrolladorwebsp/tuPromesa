@@ -12,7 +12,6 @@ type EconomicIndicators = {
 };
 
 const footerLinks = [
-  { label: "Denunciar mi caso", href: "#" },
   { label: "Ver denuncias", href: "#" },
   { label: "FAQ", href: "#" },
   { label: "Contacto", href: "#" },
@@ -48,7 +47,7 @@ export default function Footer() {
           dolar:
             typeof data?.dolar?.valor === "number" ? data.dolar.valor : null,
         });
-      } catch (error) {
+      } catch {
         if (controller.signal.aborted) return;
 
         setIndicators({
@@ -193,6 +192,12 @@ export default function Footer() {
             <h4 className="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-muted)]">
               Navegación
             </h4>
+            <a
+              href="/#registrar-reclamo"
+              className="text-sm text-[var(--color-text-secondary)] transition-colors hover:text-white"
+            >
+              Denunciar mi caso
+            </a>
             {footerLinks.map((link) => (
               <Link
                 key={link.label}

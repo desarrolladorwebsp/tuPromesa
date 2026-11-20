@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlineMenuAlt3, HiOutlineX } from "react-icons/hi";
-import OpenCaseModalButton from "@/components/common/OpenCaseModalButton";
+import CaseSectionLink from "@/components/common/CaseSectionLink";
 import Image from "next/image";
 
 const navLinks = [
@@ -110,9 +110,9 @@ export default function Navbar() {
             </nav>
 
             <div className="hidden lg:block">
-              <OpenCaseModalButton
+              <CaseSectionLink
                 label="Denunciar mi caso"
-                styless="text-xs"
+                className="text-xs"
               />
             </div>
 
@@ -184,9 +184,10 @@ export default function Navbar() {
               </div>
 
               <div className="mt-auto pt-6">
-                <OpenCaseModalButton
+                <CaseSectionLink
                   label="Denunciar mi caso"
-                  styless="w-full"
+                  className="w-full"
+                  onClick={() => setIsOpen(false)}
                 />
               </div>
             </motion.aside>

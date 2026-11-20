@@ -1,7 +1,7 @@
 "use client";
 
 import ImpactStatsSection from "@/sections/ImpactStatusSection";
-import OpenCaseModalButton from "@/components/common/OpenCaseModalButton";
+import CaseSectionLink from "@/components/common/CaseSectionLink";
 import Image from "next/image";
 
 import { motion } from "framer-motion";
@@ -62,7 +62,7 @@ export default function HeroSection() {
           transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
           className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-2"
         >
-          <OpenCaseModalButton />
+          <CaseSectionLink />
 
           <button className="px-6 py-3 cursor-pointer rounded-[var(--radius-md)] font-semibold border border-white/30 text-white backdrop-blur-sm bg-white/10 hover:bg-white/20 hover:border-white/50 transition-all duration-200">
             Ver denuncias reales →

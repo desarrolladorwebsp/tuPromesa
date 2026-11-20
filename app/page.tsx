@@ -1,6 +1,6 @@
 import HeroSection from "@/sections/HeroSection";
 import ReportedCasesSection from "@/sections/ReportedCasesSection";
-import CtaSection from "@/sections/CtaSection";
+import RegisterCaseSection from "@/sections/RegisterCaseSection";
 import Footer from "@/sections/Footer";
 import FloatingActionBar from "@/components/common/FloatingActionBar";
 import Navbar from "@/sections/NavBar";
@@ -29,7 +29,7 @@ export default function Home() {
       <ReportedCasesSection />
       <LegalSupportSection />
       <NewsSection />
-      <CtaSection />
+      <RegisterCaseSection />
       <Footer />
       <FloatingActionBar />
     </>

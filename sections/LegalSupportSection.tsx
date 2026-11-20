@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import OpenCaseModalButton from "@/components/common/OpenCaseModalButton";
+import CaseSectionLink from "@/components/common/CaseSectionLink";
 
 const legalPoints = [
   "Evaluación inicial de antecedentes y viabilidad del caso",
@@ -69,7 +69,7 @@ export default function LegalSupportSection() {
           </div>
 
           <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
-            <OpenCaseModalButton label="Solicitar evaluación de mi caso" />
+            <CaseSectionLink label="Solicitar evaluación de mi caso" />
           </div>
         </motion.div>
 
